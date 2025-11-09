@@ -7,91 +7,128 @@ from bs4 import BeautifulSoup
 
 # --- BƯỚC 1: ĐIỀN THÔNG TIN CỦA BẠN VÀO ĐÂY ---
 
-# Đặt tên file JSON bạn đã xuất ra.
-# (Script này giả định file đó nằm CÙNG THƯ MỤC với file .py này)
+# Đảm bảo tên file này khớp với file cookie bạn đã xuất ra
 COOKIE_JSON_FILE = "cookies.json" 
 
 # Tổng số bài tập (để an toàn, ta lấy 500)
 TOTAL_PROBLEMS_TO_FETCH = 500
 
-# URL API (đã xác nhận)
-API_LIST_URL = "https://dbapi.ptit.edu.vn/api/app/question/search"
+# URL API tìm kiếm danh sách câu hỏi (trả về mảng có trường 'content')
+API_LIST_URL = "https://dbapi.ptit.edu.vn/api/app/question"
+
+# URL API chi tiết câu hỏi (JSON) dạng: https://dbapi.ptit.edu.vn/api/app/question/{uuid}
+API_DETAIL_URL_BASE = "https://dbapi.ptit.edu.vn/api/app/question/"
 
 # URL cơ sở của trang chi tiết (đã xác nhận)
 BASE_DETAIL_URL = "https://db.ptit.edu.vn/question-detail/"
 
 # Thư mục để lưu file .txt
-OUTPUT_DIR = "output"
+OUTPUT_DIR = "problems"
 
-# ⭐️ QUAN TRỌNG: Chỉ cần điền "Authorization"
-# Dán toàn bộ giá trị "Bearer ..." của bạn vào đây
-AUTH_TOKEN = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdE5hbWUiOiJUcuG6p24gWHXDom4iLCJsYXN0TmFtZSI6IlRow6BuaCIsInN1YiI6IjY4M2VlNTY4LWM3OGYtNGZjYi05ZWQ2LTMxN2VmYTllOTk3MSIsInJvbGUiOiJTVFVERU5UIiwidXNlclByZWZpeCI6ImVkVGF6eSIsInRva2VuVHlwZSI6ImFjY2Vzc1Rva2VuIiwiZXhwIjoxNzYyNTIxNDg4LCJpYXQiOjE3NjI1MTQyODgsInVzZXJDb2RlIjoiQjIzRENBVDI4MCIsInByb3ZpZGVyVHlwZSI6IkxPQ0FMIiwidXNlcm5hbWUiOiJCMjNEQ0FUMjgwIiwic2Vzc2lvblByZWZpeCI6IjM4ZWY5aTE1c2hoayJ9.FeExx8LdaVoUe823kwHxrNjRomDv3s1w_-GrFCA2bRk'
+debug_file_saved = False
 
-
-# --- KẾT THÚC PHẦN ĐIỀN THÔNG TIN ---
+# --- BẠN KHÔNG CẦN SỬA GÌ BÊN DƯỚI NỮA ---
 
 
-def load_cookies_from_json(json_file_path):
-    """Đọc file JSON cookie và chuyển thành chuỗi (string) header."""
+def load_auth_and_cookies(json_file_path):
+    """
+    Đọc file JSON cookie.
+    Tách riêng 'access_token' để làm Authorization header.
+    Gộp phần còn lại vào Cookie header.
+    """
     print(f"Đang tải cookies từ file: {json_file_path}")
     try:
         with open(json_file_path, 'r', encoding='utf-8') as f:
             cookies_list = json.load(f)
         
-        # Chuyển đổi list JSON thành định dạng string "name=value; name2=value2"
-        cookie_strings = []
-        for cookie in cookies_list:
-            # Chỉ lấy cookie cho đúng domain (nếu có)
-            # Bạn có thể bỏ qua check 'domain' nếu file JSON của bạn không có
-            if 'domain' in cookie and 'ptit.edu.vn' not in cookie['domain']:
-                continue
-            cookie_strings.append(f"{cookie['name']}={cookie['value']}")
-            
-        cookie_header_string = "; ".join(cookie_strings)
+        auth_token_value = None
+        other_cookie_strings = []
         
-        if not cookie_header_string:
-            print("[CẢNH BÁO] Không tìm thấy cookie phù hợp trong file JSON.")
-            return None
+        for cookie in cookies_list:
+            # 1. Tìm access_token
+            if cookie['name'] == 'access_token':
+                auth_token_value = cookie['value']
             
-        print("Tải cookie thành công.")
-        return cookie_header_string
+            # 2. Gộp tất cả (bao gồm cả access_token) vào chuỗi cookie
+            #    Một số hệ thống cần cả hai, làm vậy sẽ an toàn hơn
+            other_cookie_strings.append(f"{cookie['name']}={cookie['value']}")
+            
+        if not auth_token_value:
+            print("[LỖI NGHIÊM TRỌNG] Không tìm thấy 'access_token' trong file cookie.")
+            return None, None
+            
+        # Định dạng "Bearer <token>"
+        auth_header = f"Bearer {auth_token_value}"
+        
+        # Định dạng "cookie1=value1; cookie2=value2"
+        cookie_header = "; ".join(other_cookie_strings)
+        
+        print("Tải Authorization và Cookie thành công.")
+        return auth_header, cookie_header
         
     except FileNotFoundError:
-        print(f"[LỖI NGHIÊM TRỌNG] Không tìm thấy file '{json_file_path}'.")
-        print("Vui lòng đảm bảo file cookie nằm cùng thư mục với script.")
-        return None
-    except json.JSONDecodeError:
-        print(f"[LỖI] File '{json_file_path}' không phải là file JSON hợp lệ.")
-        return None
-    except KeyError:
-        print("[LỖI] Cấu trúc file JSON không đúng (thiếu 'name' hoặc 'value').")
-        return None
+        print(f"[LỖI] Không tìm thấy file '{json_file_path}'.")
+        return None, None
+    except Exception as e:
+        print(f"[LỖI] Xảy ra lỗi khi đọc file cookie: {e}")
+        return None, None
 
 def sanitize_filename(name):
     """Xóa các ký tự không hợp lệ khỏi tên file."""
     name = name.replace("/", "-")
     return re.sub(r'[\\*?:"<>|]', "", name).strip()
 
+def scrape_problem_details(uuid, session):
+    """Gọi API JSON để lấy chi tiết một bài tập, trả về text (HTML nguyên bản)."""
+    api_detail_url = f"{API_DETAIL_URL_BASE}{uuid}"
+    try:
+        resp = session.get(api_detail_url)
+        if resp.status_code == 401:
+            print("  [LỖI] 401 Unauthorized khi lấy chi tiết. Token đã hết hạn.")
+            return None
+        if resp.status_code == 404:
+            print("  [LỖI] 404 Không tìm thấy câu hỏi.")
+            return None
+        if resp.status_code != 200:
+            print(f"  [LỖI] API chi tiết trả về {resp.status_code}")
+            return None
+
+        try:
+            data = resp.json()
+        except json.JSONDecodeError:
+            print("  [LỖI] JSON chi tiết không hợp lệ.")
+            return None
+
+        # Dữ liệu thực tế có thể là dạng { ..., 'content': '<p>HTML</p>' }
+        # hoặc lồng sâu hơn. Ta thử nhiều khả năng.
+        html_content = None
+        if isinstance(data, dict):
+            # Trường hợp phổ biến
+            if 'content' in data and isinstance(data['content'], str):
+                html_content = data['content']
+            # Nếu backend trả về dạng { 'data': { 'content': '...' } }
+            elif 'data' in data and isinstance(data['data'], dict) and isinstance(data['data'].get('content'), str):
+                html_content = data['data']['content']
+
+        if not html_content:
+            print("  [LỖI] Không tìm thấy trường 'content' trong JSON chi tiết.")
+            return None
+
+        # Trả về HTML nguyên bản để lưu
+        return html_content.strip()
+    except requests.RequestException as e:
+        print(f"  [LỖI] Request chi tiết lỗi: {e}")
+        return None
 
 def _sanitize_http_header_value(value: str) -> str:
-    """Ensure a header value is safe for http.client/urllib3 which expect latin-1.
-
-    - If the value already encodes to latin-1, return it unchanged.
-    - Replace common problematic characters (ellipsis) with safe alternatives.
-    - As a last resort, encode with 'replace' to avoid raising UnicodeEncodeError.
-    """
+    """Đảm bảo header value encode được latin-1 (tránh UnicodeEncodeError)."""
     if not isinstance(value, str):
         return value
-
     try:
         value.encode('latin-1')
         return value
     except UnicodeEncodeError:
-        # Replace common Unicode characters that often appear in copy-pasted tokens
-        # (e.g. ellipsis U+2026). Add more replacements here if needed.
         replaced = value.replace('\u2026', '...')
-
-        # If still not latin-1, fall back to lossy replacement to guarantee safety.
         try:
             replaced.encode('latin-1')
             return replaced
@@ -100,102 +137,80 @@ def _sanitize_http_header_value(value: str) -> str:
 
 
 def sanitize_headers_for_http(headers: dict) -> dict:
-    """Return a copy of headers where all string values are safe for latin-1.
-
-    Also prints a small notice if any header values were changed.
-    """
-    out = {}
-    changed_keys = []
+    out, changed = {}, []
     for k, v in headers.items():
         if isinstance(v, str):
             new_v = _sanitize_http_header_value(v)
             out[k] = new_v
             if new_v != v:
-                changed_keys.append(k)
+                changed.append(k)
         else:
             out[k] = v
-
-    if changed_keys:
-        print(f"[NOTICE] Sanitized non-latin-1 characters in headers: {', '.join(changed_keys)}")
-
+    if changed:
+        print(f"[NOTICE] Đã chuẩn hóa ký tự lạ trong header: {', '.join(changed)}")
     return out
 
-def scrape_problem_details(uuid, session):
-    """Lấy nội dung chi tiết của một bài tập từ UUID của nó."""
-    detail_url = f"{BASE_DETAIL_URL}{uuid}"
-    try:
-        response = session.get(detail_url) 
-        if response.status_code != 200:
-            print(f"  [LỖI] Không tải được trang {uuid}. Status: {response.status_code}")
-            return None
-        soup = BeautifulSoup(response.text, 'html.parser')
-        content_div = soup.find('div', class_='dblabcode-content')
-        if not content_div:
-            print(f"  [LỖI] Không tìm thấy 'dblabcode-content' trong {uuid}")
-            return None
-        return content_div.get_text(separator='\n', strip=True)
-    except requests.RequestException as e:
-        print(f"  [LỖI] Request đến {uuid} thất bại: {e}")
-        return None
 
 def fetch_all_problems(headers):
-    """Gọi API một lần duy nhất để lấy toàn bộ danh sách bài tập."""
-    print(f"Đang gọi API để lấy danh sách {TOTAL_PROBLEMS_TO_FETCH} bài tập...")
-    
+    """Gọi API search để lấy danh sách bài tập (một trang lớn)."""
+    print(f"Đang gọi API để lấy danh sách tối đa {TOTAL_PROBLEMS_TO_FETCH} bài tập...")
+
     params = {
         "page": 0,
         "size": TOTAL_PROBLEMS_TO_FETCH,
         "sort": "createdAt,desc"
     }
-    
+
     session = requests.Session()
-    # Sanitize headers to ensure values are safe for latin-1 encoding
-    safe_headers = sanitize_headers_for_http(headers)
-    session.headers.update(safe_headers)
-    
+    session.headers.update(sanitize_headers_for_http(headers))
+
     try:
         response = session.get(API_LIST_URL, params=params)
-        
+
         if response.status_code == 401:
-            print("[LỖI NGHIÊM TRỌNG] Lỗi 401 Unauthorized.")
-            print("Token 'Authorization' hoặc 'Cookie' của bạn đã sai hoặc hết hạn.")
-            print("Vui lòng đăng nhập lại web, mở DevTools (F12) và copy lại giá trị mới.")
+            print("[LỖI] 401 Unauthorized. Token / cookie hết hạn.")
             return None, None
-            
+        if response.status_code == 400:
+            print("[LỖI] 400 Bad Request. Tham số có thể sai.")
+            print("Response:", response.text[:500])
+            return None, None
         if response.status_code != 200:
-            print(f"Lỗi khi gọi API! Status: {response.status_code}")
-            print(response.text)
+            print(f"[LỖI] API search trả về {response.status_code}")
+            print(response.text[:500])
             return None, None
 
-        data = response.json()
+        try:
+            data = response.json()
+        except json.JSONDecodeError:
+            print("[LỖI] JSON trả về từ API search không hợp lệ.")
+            return None, None
+
         problems = data.get('content')
-        
         if problems is None:
-            print("Lỗi: Không tìm thấy key 'content' trong JSON trả về.")
+            print("[LỖI] Không thấy key 'content' trong JSON search.")
             return None, None
-            
-        print(f"Thành công! Lấy được thông tin của {len(problems)} bài tập.")
-        return problems, session
 
+        print(f"Thành công! Nhận {len(problems)} bài tập.")
+        return problems, session
     except requests.RequestException as e:
-        print(f"Request đến API thất bại: {e}")
-        return None, None
-    except json.JSONDecodeError:
-        print("Lỗi: Không thể giải mã JSON từ API.")
+        print(f"[LỖI] Request search thất bại: {e}")
         return None, None
 
 def main():
-    # 1. Tải cookie từ file JSON
-    cookie_string = load_cookies_from_json(COOKIE_JSON_FILE)
-    if cookie_string is None:
-        print("Không thể tải cookie. Đang dừng chương trình.")
+    # 1. Tải cookie và auth token từ file JSON
+    auth_header, cookie_header = load_auth_and_cookies(COOKIE_JSON_FILE)
+    
+    if auth_header is None or cookie_header is None:
+        print("Không thể tải thông tin xác thực. Đang dừng chương trình.")
         return
 
     # 2. Xây dựng Headers
     headers = {
-        "Authorization": AUTH_TOKEN,
-        "Cookie": cookie_string,
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36"
+        "Authorization": auth_header,
+        "Cookie": cookie_header,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Safari/537.36",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
     }
     
     # 3. Lấy danh sách bài tập
@@ -219,6 +234,7 @@ def main():
             uuid = problem.get('id')
             code = problem.get('questionCode')
             title = problem.get('title')
+            database_type = problem.get('questionDetails')[0]['typeDatabase']['name']
             
             if not all([uuid, code, title]):
                 print(f"Bỏ qua bài {i}/{total}: Thiếu thông tin.")
@@ -226,25 +242,29 @@ def main():
 
             print(f"[{i}/{total}] Đang xử lý: {code} - {title}")
             
-            filename = sanitize_filename(f"{code} - {title}.txt")
+            filename = sanitize_filename(f"{code} - {title}.html")
             filepath = os.path.join(OUTPUT_DIR, filename)
             
             if os.path.exists(filepath):
                 print(f"  -> Đã tồn tại, bỏ qua.")
                 continue
 
-            content = scrape_problem_details(uuid, session)
+            content_html = scrape_problem_details(uuid, session)
+            if not content_html:
+                continue
+
+            # Lưu trực tiếp HTML hoặc chuyển sang text thuần nếu muốn.
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(f"ID: {code}\n")
+                f.write(f"Tiêu đề: {title}\n")
+                f.write(f"URL WEB: {BASE_DETAIL_URL}{uuid}\n")
+                f.write(f"URL API: {API_DETAIL_URL_BASE}{uuid}\n")
+                f.write(f"Loại Database: {database_type}\n")
+                f.write("-" * 30 + "\n\n")
+                f.write(content_html)
+            print(f"  -> Đã lưu vào: {filepath}")
             
-            if content:
-                with open(filepath, 'w', encoding='utf-8') as f:
-                    f.write(f"ID: {code}\n")
-                    f.write(f"Tiêu đề: {title}\n")
-                    f.write(f"URL: {BASE_DETAIL_URL}{uuid}\n")
-                    f.write("-" * 30 + "\n\n")
-                    f.write(content)
-                print(f"  -> Đã lưu vào: {filepath}")
-            
-            time.sleep(0.5) 
+            time.sleep(0.3) # Giảm tốc độ để tôn trọng server
 
         except Exception as e:
             print(f"  [LỖI] Xảy ra lỗi ngoài dự kiến khi xử lý bài {uuid}: {e}")

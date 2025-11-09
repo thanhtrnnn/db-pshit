@@ -1,0 +1,22 @@
+Bắt đầu Script
+  |
+  +--> 1. Gọi đến "API 
+https://dbapi.ptit.edu.vn/api/app/question/search?page=0&size=30&sort=createdAt%2Cdesc" (để lấy mảng JSON chứa các câu hỏi)
+  |    |
+  |    +--> 2. Parse JSON trả về, lấy ra danh sách các `uuid`
+  |
+  +--> 3. Tạo một vòng lặp (loop) qua từng `uuid` trong danh sách
+  |    |
+  |    +--> 4. Với mỗi `uuid`:
+  |    |    |
+  |    |    +--> Tạo URL (ví dụ: ".../question/" + uuid)
+  |    |    |
+  |    |    +--> 5. Gọi đến "API Nội Dung" với URL này
+  |    |    |
+  |    |    +--> 6. Nhận JSON chứa "content" (chính là HTML câu hỏi)
+  |    |    |
+  |    |    +--> 7. Lưu "content" này vào file (ví dụ: save_to_file.py)
+  |    |
+  |    +--> (Lặp lại cho `uuid` tiếp theo)
+  |
+  +--> 8. Hoàn thành!

@@ -1,0 +1,9 @@
+-- Problem: SQL2783 - Tìm ba quốc gia có điểm trung bình cao nhất và tổng số người chơi từ các quốc gia đó..html
+-- Auto-classified section: 01_counting_grouping
+-- Rationale: Đếm/tổng hợp theo nhóm với GROUP BY; dùng SUM/COUNT/AVG và CASE khi cần điều kiện.
+-- Adjust table/column names before running.
+
+-- Counting / Grouping template
+SELECT <group_cols>, COUNT(*) AS cnt
+FROM <table>
+GROUP BY <group_cols>;

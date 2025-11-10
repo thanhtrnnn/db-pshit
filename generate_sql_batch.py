@@ -5,7 +5,7 @@ Workflow:
 2. Read file content; extract problem_id from filename prefix.
 3. Provide a taxonomy hint guess (simple heuristics) based on keywords.
 4. Call `generate_sql_solution` (Gemini) to obtain {sql, reasoning, taxonomy_section}.
-5. Determine final folder from taxonomy_section (fallback to counting_grouping).
+5. Determine final folder from taxonomy_section (fallback to retrieval).
 6. Write solution file under `solutions/<section>/<original title>.sql` with cleaned header.
 7. Update `solutions/index.md` (append new entry if missing).
 
@@ -24,73 +24,136 @@ import re
 import os
 from pathlib import Path
 from typing import Tuple
+import time
 # Note: Import of ai_client is deferred to runtime to support --dry-run without requiring GOOGLE_API_KEY.
 
 ROOT = Path(__file__).parent
 PROBLEMS_DIR = ROOT / "problems"
 SOLUTIONS_DIR = ROOT / "solutions"
 INDEX_FILE = SOLUTIONS_DIR / "index.md"
+IGNORE_FILE = ROOT / "ignore.txt"
 
 SECTION_MAP = {
-    "dml": "10_dml",
-    "topn_window": "04_topn_window",
-    "conditional_pivot": "05_conditional_pivot",
-    "pivot": "05_conditional_pivot",
-    "counting_grouping": "01_counting_grouping",
-    "joins_set": "03_joins_set",
-    "division": "06_division",
-    "set_difference": "08_set_difference",
-    "window": "09_window_sequences",
-    "filtering_dates": "02_filtering_dates",
-    "string_normalization": "11_string_normalization",
-    "range_join": "07_range_join",
+    "modification": "01_modification",
+    "aggregation_simple": "02_aggregation_simple",
+    "aggregation_grouped": "03_aggregation_grouped",
+    "window_functions": "04_window_functions",
+    "pivoting": "05_pivoting",
+    "set_operations": "06_set_operations",
+    "relational_division": "07_relational_division",
+    "range_join": "08_range_join",
+    "filtering": "09_filtering",
+    "retrieval": "10_retrieval",
+    "complex": "11_complex",
 }
 
 ALLOWED_TAXONOMY = set(SECTION_MAP.keys())
 
+def load_ignored_problems() -> set[str]:
+    """Load set of problem IDs to ignore from ignore.txt."""
+    ignored = set()
+    if IGNORE_FILE.exists():
+        with IGNORE_FILE.open(encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    # Extract problem ID like SQL94
+                    m = re.match(r"(SQL-?\d+)", line)
+                    if m:
+                        ignored.add(m.group(1))
+    return ignored
+
+def add_to_ignore(problem_id: str):
+    """Append problem_id to ignore.txt if not already present."""
+    if not IGNORE_FILE.exists():
+        IGNORE_FILE.write_text("", encoding="utf-8")
+    with IGNORE_FILE.open("r+", encoding="utf-8") as f:
+        lines = f.readlines()
+        if any(problem_id in line for line in lines):
+            return  # Already ignored
+        f.write(f"{problem_id}\n")
+
 def guess_taxonomy_hint(html: str) -> str:
     lower = html.lower()
-    if "update" in lower or "delete" in lower or "insert" in lower:
-        return "dml"
-    if "row_number" in lower or "over(" in lower:
-        return "topn_window"
-    if "pivot" in lower or "season" in lower or "case when" in lower:
-        return "conditional_pivot"
-    if re.search(r"count\s*\(", lower):
-        return "counting_grouping"
-    if "intersect" in lower or "except" in lower:
-        return "set_difference"
-    if re.search(r"year|month|dateadd|datediff|getdate|to_date|date\(", lower):
-        return "filtering_dates"
-    if re.search(r"upper\(|lower\(|trim\(|replace\(|regexp", lower):
-        return "string_normalization"
-    return "counting_grouping"
+    if any(k in lower for k in ("insert", "update", "delete", "create table", "alter table", "drop table", " merge ")):
+        return "modification"
+    if re.search(r"\bover\s*\(", lower) or any(func in lower for func in ("row_number", "dense_rank", "lag", "lead")):
+        return "window_functions"
+    if "sum(case" in lower or " pivot" in lower:
+        return "pivoting"
+    if any(op in lower for op in (" union ", "intersect", " except")):
+        return "set_operations"
+    if (" not exists" in lower and (" all " in lower or " every " in lower)) or "having count" in lower and "distinct" in lower:
+        return "relational_division"
+    if " between " in lower and " join " in lower:
+        return "range_join"
+    if re.search(r"dateadd|datediff|getdate|extract\(|to_date|interval|year\(|month\(|day\(|datediff", lower):
+        return "filtering"
+    if re.search(r"upper\(|lower\(|trim\(|substring\(|replace\(|regexp|len\(", lower):
+        return "filtering"
+    if "group by" in lower:
+        return "aggregation_grouped"
+    if re.search(r"count\s*\(|sum\s*\(|avg\s*\(|min\s*\(|max\s*\(", lower):
+        return "aggregation_simple"
+    if " join " in lower or " exists" in lower or " in (" in lower:
+        return "retrieval"
+    return "retrieval"
 
-def normalize_taxonomy(raw: str, fallback_hint: str) -> str:
-    r = (raw or '').strip().lower()
-    if r in ALLOWED_TAXONOMY:
-        return r
+def _canonical_taxonomy(name: str | None) -> str | None:
+    if not name:
+        return None
+    cleaned = name.strip().lower().replace("-", "_").replace(" ", "_")
+    if cleaned in ALLOWED_TAXONOMY:
+        return cleaned
     synonyms = {
-        "window_functions": "topn_window",
-        "window": "topn_window",
-        "pivoting": "conditional_pivot",
-        "filtering": "filtering_dates",
-        "date_filtering": "filtering_dates",
-        "string": "string_normalization",
-        "normalization": "string_normalization",
+        "dml": "modification",
+        "ddl": "modification",
+        "counting": "aggregation_simple",
+        "aggregation": "aggregation_grouped",
+        "aggregations": "aggregation_grouped",
+        "counting_grouping": "aggregation_grouped",
+        "grouping": "aggregation_grouped",
+        "topn_window": "window_functions",
+        "window": "window_functions",
+        "windowing": "window_functions",
+        "window_functions": "window_functions",
+        "conditional_pivot": "pivoting",
+        "pivot": "pivoting",
+        "pivoting": "pivoting",
+        "set_difference": "set_operations",
+        "set": "set_operations",
+        "set_logic": "set_operations",
+        "division": "relational_division",
         "range": "range_join",
         "join_range": "range_join",
-        "grouping": "counting_grouping",
+        "range_join": "range_join",
+        "filtering_dates": "filtering",
+        "string_normalization": "filtering",
+        "date_filtering": "filtering",
+        "filtering": "filtering",
+        "joins": "retrieval",
+        "joins_simple": "retrieval",
+        "join": "retrieval",
+        "mixed": "complex",
     }
-    if r in synonyms:
-        return synonyms[r]
-    # fallback precedence: dml > topn_window > conditional_pivot > counting_grouping > joins_set
-    if fallback_hint in ALLOWED_TAXONOMY:
-        return fallback_hint
-    return "counting_grouping"
+    if cleaned in synonyms:
+        mapped = synonyms[cleaned]
+        if mapped in ALLOWED_TAXONOMY:
+            return mapped
+    return None
+
+
+def normalize_taxonomy(raw: str, fallback_hint: str) -> str:
+    primary = _canonical_taxonomy(raw)
+    if primary:
+        return primary
+    fallback = _canonical_taxonomy(fallback_hint)
+    if fallback:
+        return fallback
+    return "retrieval"
 
 def parse_problem_id(filename: str) -> str:
-    m = re.match(r"(SQL\d+)", filename)
+    m = re.match(r"(SQL-?\d+)", filename, re.IGNORECASE)
     return m.group(1) if m else "UNKNOWN"
 
 def ensure_index_header():
@@ -155,6 +218,7 @@ def _mock_generate_sql_solution(problem_html: str, problem_id: str, taxonomy_hin
 
 def main(limit: int, force: bool, dry_run: bool, replace_index: bool):
     ensure_index_header()
+    ignored_problems = load_ignored_problems()
     html_files = sorted(p for p in PROBLEMS_DIR.glob("SQL*.html"))
     processed = 0
     for html_path in html_files:
@@ -162,6 +226,9 @@ def main(limit: int, force: bool, dry_run: bool, replace_index: bool):
             break
         problem_html_name = html_path.name
         problem_id = parse_problem_id(problem_html_name)
+
+        if problem_id in ignored_problems:
+            continue  # Skip ignored problems
 
         # Skip if already present and not forcing nor replacing index
         if index_has_entry(problem_html_name) and not (force or replace_index):
@@ -175,14 +242,21 @@ def main(limit: int, force: bool, dry_run: bool, replace_index: bool):
             # Lazy import to avoid requiring GOOGLE_API_KEY during dry runs
             from ai_client import generate_sql_solution  # type: ignore
             data = generate_sql_solution(html_content, problem_id, taxonomy_hint)
+            time.sleep(6)  # Cooldown to withstand rate limits
         taxonomy_section_raw = data.get("taxonomy_section", taxonomy_hint)
         taxonomy_section = normalize_taxonomy(taxonomy_section_raw, taxonomy_hint)
-        section_folder = SECTION_MAP.get(taxonomy_section, SECTION_MAP.get(taxonomy_hint, "01_counting_grouping"))
+        if taxonomy_section not in SECTION_MAP:
+            taxonomy_section = normalize_taxonomy(taxonomy_hint, "retrieval")
+        if taxonomy_section not in SECTION_MAP:
+            taxonomy_section = "retrieval"
+        section_folder = SECTION_MAP.get(taxonomy_section, SECTION_MAP["retrieval"])
         if replace_index:
             remove_index_rows(problem_html_name)
         solution_path = write_solution(section_folder, problem_html_name, data["sql"])
         rel_path = f"{section_folder}/{solution_path.name}"
-        append_index_row(problem_html_name, section_folder, rel_path)
+        append_index_row(problem_html_name, taxonomy_section, rel_path)
+        if not dry_run:
+            add_to_ignore(problem_id)
         processed += 1
         print(f"Generated {problem_id} -> {rel_path} (section={section_folder})")
 

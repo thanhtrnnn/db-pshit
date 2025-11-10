@@ -1,0 +1,3 @@
+json
+{"sql":"```sql\n-- Tables: MATHANG\n-- Technique: retrieval (dialect: MySQL)\n\nSELECT\n  MAHANG,\n  TENHANG,\n  SOLUONG\nFROM MATHANG;
+```","reasoning":"The user wants to retrieve the item code, name, and quantity for all available items. I analyzed the ERD diagram provided in the image link. The `MATHANG` table contains all the necessary columns: `MAHANG` (Mã hàng), `TENHANG` (tên hàng), and `SOLUONG` (số lượng). Therefore, a simple SELECT query from the `MATHANG` table is sufficient to answer the question.","taxonomy_section":"retrieval"}

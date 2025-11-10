@@ -1,0 +1,2 @@
+SELECT * FROM Class
+WHERE dept = 'CSE' AND number BETWEEN 400 AND 499;

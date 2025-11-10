@@ -8,91 +8,86 @@ try:
 except Exception:
     BeautifulSoup = None
 
-# Mapping of section identifiers (folder names) to keywords or classifier lambdas
+# Mapping of section identifiers (folder names) to keywords or classifier hints
 SECTIONS = {
-    '01_counting_grouping': ['tổng số', 'số lượng', 'count', 'bao nhiêu', 'average', 'trung bình', 'tỷ lệ', 'ratio'],
-    '02_filtering_dates': ['trong tuần', 'tháng', 'năm', 'quý', 'gần đây', 'recent', 'ngày', 'date'],
-    '03_joins_set': ['cả', 'và', 'cung cấp', 'join', 'có ở', 'ở cả', 'intersection'],
-    '04_topn_window': ['top', 'cao nhất', 'lớn nhất', 'nhỏ nhất', 'rank', 'gần đây nhất'],
-    '05_conditional_pivot': ['mùa', 'season', 'riêng', 'mỗi mùa', 'pivot'],
-    '06_division': ['tất cả', 'all', 'mua toàn bộ', 'có cả A và B'],
-    '07_range_join': ['khoảng', 'between', 'effective', 'date range'],
-    '08_set_difference': ['không', 'nhưng không', 'either', 'trừ', 'except'],
-    '09_window_sequences': ['liên tiếp', 'consecutive', 'sequence'],
-    '10_dml': ['cập nhật', 'xóa', 'chèn', 'insert', 'delete', 'update', 'thêm'],
-    '11_string_normalization': ['chuẩn hóa', 'fix name', 'viết hoa', 'normalize', 'chỉnh sửa tên'],
+    '01_modification': ['cập nhật', 'xóa', 'chèn', 'insert', 'delete', 'update', 'thêm', 'create table', 'alter', 'drop', 'merge'],
+    '02_aggregation_simple': ['tổng số', 'bao nhiêu', 'count', 'average', 'trung bình', 'sum', 'ratio'],
+    '03_aggregation_grouped': ['mỗi', 'per', 'theo', 'group', 'by department', 'phân loại', 'category'],
+    '04_window_functions': ['top', 'cao nhất', 'lớn nhất', 'nhỏ nhất', 'rank', 'row_number', 'dense_rank', 'lag', 'lead', 'running'],
+    '05_pivoting': ['pivot', 'CASE WHEN', 'mùa', 'season', 'matrix', 'cột riêng'],
+    '06_set_operations': ['intersect', 'union', 'except', 'both', 'chung', 'loại trừ'],
+    '07_relational_division': ['tất cả', 'all', 'cả hai', 'mọi', 'đều', 'all products', 'both categories'],
+    '08_range_join': ['khoảng', 'between', 'effective', 'date range', '>=', '<=', 'window của'],
+    '09_filtering': ['trong tuần', 'tháng', 'năm', 'gần đây', 'recent', 'ngày', 'date', 'substring', 'trim', 'normalize', 'chuẩn hóa', 'fix name'],
+    '10_retrieval': ['liệt kê', 'danh sách', 'join', 'và', 'ở đâu', 'who', 'which'],
+    '11_complex': ['thủ tục', 'procedure', 'function', 'phức tạp', 'nhiều bước', 'comprehensive'],
 }
 
 TEMPLATE_SNIPPETS = {
-    '01_counting_grouping': """-- Counting / Grouping template
+    '01_modification': """-- Modification (DML/DDL) template
+-- UPDATE example
+UPDATE <table>
+SET <column> = <expression>
+WHERE <condition>;
+""",
+    '02_aggregation_simple': """-- Simple aggregation template
+SELECT COUNT(*) AS total_records
+FROM <table>;
+""",
+    '03_aggregation_grouped': """-- Grouped aggregation template
 SELECT <group_cols>, COUNT(*) AS cnt
 FROM <table>
 GROUP BY <group_cols>;
 """,
-    '02_filtering_dates': """-- Date filtering template
-SELECT *
-FROM <table>
-WHERE <date_col> BETWEEN '<start-date>' AND '<end-date>';
-""",
-    '03_joins_set': """-- Join / Set intersection template
-SELECT a.<col>, b.<col2>
-FROM <table_a> a
-JOIN <table_b> b ON b.<fk> = a.<pk>;
-""",
-    '04_topn_window': """-- Top-N per group (window) template
+    '04_window_functions': """-- Window function template
 SELECT * FROM (
   SELECT <partition_col>, <measure>,
          ROW_NUMBER() OVER (PARTITION BY <partition_col> ORDER BY <measure> DESC) rn
   FROM <table>
-) t WHERE rn <= <N>;
+) ranked
+WHERE rn <= <N>;
 """,
-    '05_conditional_pivot': """-- Conditional aggregation (pivot-like) template
+    '05_pivoting': """-- Conditional aggregation (pivot) template
 SELECT <group_col>,
        SUM(CASE WHEN <cond1> THEN <val> ELSE 0 END) AS metric1,
        SUM(CASE WHEN <cond2> THEN <val> ELSE 0 END) AS metric2
 FROM <table>
 GROUP BY <group_col>;
 """,
-    '06_division': """-- Division (all items) template
+    '06_set_operations': """-- Set operations template
+(SELECT <cols> FROM <table_a>)
+INTERSECT
+(SELECT <cols> FROM <table_b>);
+""",
+    '07_relational_division': """-- Relational division template
 SELECT entity_id
 FROM entity_item
 GROUP BY entity_id
-HAVING COUNT(DISTINCT item_id) = (SELECT COUNT(DISTINCT item_id) FROM items);
+HAVING COUNT(DISTINCT item_id) = (
+    SELECT COUNT(DISTINCT item_id)
+    FROM items
+);
 """,
-    '07_range_join': """-- Range join template
+    '08_range_join': """-- Range join template
 SELECT f.*, p.price
 FROM facts f
 JOIN prices p ON p.product_id = f.product_id
              AND f.event_date BETWEEN p.start_date AND p.end_date;
 """,
-    '08_set_difference': """-- A but not B template
-SELECT a.*
-FROM table_a a
-LEFT JOIN table_b b ON b.a_id = a.id
-WHERE b.a_id IS NULL;
+    '09_filtering': """-- Filtering template
+SELECT *
+FROM <table>
+WHERE <condition involving dates/strings>;
 """,
-    '09_window_sequences': """-- Consecutive sequence detection template
-SELECT DISTINCT val
-FROM (
-  SELECT val,
-         LAG(val,1) OVER (ORDER BY id) AS v1,
-         LAG(val,2) OVER (ORDER BY id) AS v2
-  FROM logs
-) t
-WHERE val = v1 AND val = v2;
+    '10_retrieval': """-- Basic retrieval template
+SELECT <columns>
+FROM <table_a> a
+JOIN <table_b> b ON b.<fk> = a.<pk>
+WHERE <predicate>;
 """,
-    '10_dml': """-- DML examples
--- INSERT
-INSERT INTO <table>(col1,col2) VALUES (..);
--- UPDATE
-UPDATE <table> SET col = expr WHERE condition;
--- DELETE
-DELETE FROM <table> WHERE condition;
-""",
-    '11_string_normalization': """-- String normalization template
-SELECT id,
-       CONCAT(UPPER(LEFT(name,1)), LOWER(SUBSTRING(name,2))) AS fixed_name
-FROM people;
+    '11_complex': """-- Complex logic placeholder
+-- Combine multiple techniques as required for the problem statement.
+SELECT ...;
 """,
 }
 
@@ -130,26 +125,28 @@ def classify(filename_lower: str, content_lower: str):
                 if kw in hs:
                     return section
     # Strong signals
-    if any(w in content_lower for w in ['insert', 'update', 'delete', 'chèn', 'cập nhật', 'xóa']):
-        return '10_dml'
-    if any(w in content_lower for w in ['consecutive', 'liên tiếp', 'lag', 'lead']):
-        return '09_window_sequences'
-    if any(w in content_lower for w in ['row_number', 'rank', 'dense_rank', 'top 3', 'top 5', 'top-']):
-        return '04_topn_window'
+    if any(w in content_lower for w in ['insert', 'update', 'delete', 'chèn', 'cập nhật', 'xóa', 'create table', 'alter table']):
+        return '01_modification'
+    if any(w in content_lower for w in ['row_number', 'rank', 'dense_rank', 'top 3', 'top 5', 'lag', 'lead']):
+        return '04_window_functions'
     if any(w in content_lower for w in ['between', 'effective date', 'hiệu lực', 'start_date', 'end_date']):
-        return '07_range_join'
+        return '08_range_join'
     if any(w in content_lower for w in ['tất cả', 'bought all', 'all products', 'mọi sản phẩm']):
-        return '06_division'
-    if any(w in content_lower for w in ['không có trong', 'nhưng không', 'except', 'anti join']):
-        return '08_set_difference'
-    if any(w in content_lower for w in ['viết hoa', 'normalize', 'chuẩn hóa', 'capitalize']):
-        return '11_string_normalization'
-    # Fallback
+        return '07_relational_division'
+    if any(w in content_lower for w in ['không có trong', 'nhưng không', 'except', 'anti join', 'intersect']):
+        return '06_set_operations'
+    if any(w in content_lower for w in ['viết hoa', 'normalize', 'chuẩn hóa', 'capitalize', 'substring', 'trim']):
+        return '09_filtering'
+    if 'group by' in content_lower:
+        return '03_aggregation_grouped'
+    if 'count(' in content_lower or 'sum(' in content_lower:
+        return '02_aggregation_simple'
+    # Fallbacks based on filename cues
     if 'top' in filename_lower or 'cao nhất' in filename_lower:
-        return '04_topn_window'
+        return '04_window_functions'
     if 'trung bình' in filename_lower or 'average' in filename_lower:
-        return '01_counting_grouping'
-    return '01_counting_grouping'
+        return '02_aggregation_simple'
+    return '10_retrieval'
 
 # Sanitize filename to .sql
 def to_sql_filename(original_name: str) -> str:
@@ -190,17 +187,17 @@ def _ensure_unique_path(path: Path) -> Path:
 
 
 RATIONALES = {
-    '01_counting_grouping': 'Đếm/tổng hợp theo nhóm với GROUP BY; dùng SUM/COUNT/AVG và CASE khi cần điều kiện.',
-    '02_filtering_dates': 'Lọc theo thời gian/khoảng ngày và các điều kiện WHERE; có thể cần DATE functions.',
-    '03_joins_set': 'Kết hợp bảng bằng JOIN để lấy thuộc tính liên quan; giao/hội bằng GROUP BY/HAVING.',
-    '04_topn_window': 'Xếp hạng per-group bằng window functions (ROW_NUMBER/RANK) để chọn Top-N.',
-    '05_conditional_pivot': 'Tổng hợp điều kiện để tạo cột theo điều kiện (CASE) như pivot.',
-    '06_division': 'Bài toán “đã có tất cả” dùng HAVING COUNT(DISTINCT) = tổng mục tiêu.',
-    '07_range_join': 'JOIN theo khoảng thời gian hiệu lực: event_date BETWEEN start_date AND end_date.',
-    '08_set_difference': 'Anti-join để lấy A không có trong B (LEFT JOIN ... WHERE b.id IS NULL).',
-    '09_window_sequences': 'Dò chuỗi liên tiếp bằng LAG/LEAD trên thứ tự xác định.',
-    '10_dml': 'Tác vụ DML (INSERT/UPDATE/DELETE) với điều kiện chính xác; cẩn trọng phạm vi.',
-    '11_string_normalization': 'Chuẩn hóa chuỗi: viết hoa chữ cái đầu, lower các chữ còn lại, trim.',
+    '01_modification': 'Tác vụ DML/DDL (INSERT/UPDATE/DELETE/CREATE). Cần chỉ rõ điều kiện để tránh ảnh hưởng ngoài ý muốn.',
+    '02_aggregation_simple': 'Tính toán một tổng hợp duy nhất cho toàn bộ tập dữ liệu (COUNT/SUM/AVG không có GROUP BY).',
+    '03_aggregation_grouped': 'Tổng hợp theo nhóm với GROUP BY và các phép đo theo từng partition.',
+    '04_window_functions': 'Sử dụng hàm cửa sổ (ROW_NUMBER, RANK, LAG...) để xếp hạng hoặc soi liền kề.',
+    '05_pivoting': 'Biến hàng thành cột bằng tổng hợp có điều kiện hoặc PIVOT.',
+    '06_set_operations': 'Dùng UNION/INTERSECT/EXCEPT để so sánh hoặc giao/hiệu giữa các tập kết quả.',
+    '07_relational_division': 'Bài toán “đã có tất cả” với NOT EXISTS kép hoặc HAVING COUNT bằng tổng yêu cầu.',
+    '08_range_join': 'JOIN dựa trên điều kiện bất đẳng thức hoặc khoảng thời gian hiệu lực.',
+    '09_filtering': 'Tập trung vào biểu thức WHERE phức tạp: xử lý ngày/thời gian hoặc chuẩn hóa chuỗi.',
+    '10_retrieval': 'Truy xuất dữ liệu bằng SELECT/JOIN cơ bản với điều kiện bằng (=).',
+    '11_complex': 'Kết hợp nhiều kỹ thuật nâng cao (ví dụ window + pivot) hoặc logic lồng nhau phức tạp.',
 }
 
 count = 0
@@ -210,7 +207,7 @@ for entry in PROBLEMS_DIR.iterdir():
         continue
     content = extract_problem_text(entry)
     section = classify(entry.name.lower(), content)
-    template = TEMPLATE_SNIPPETS.get(section, TEMPLATE_SNIPPETS['01_counting_grouping'])
+    template = TEMPLATE_SNIPPETS.get(section, TEMPLATE_SNIPPETS['10_retrieval'])
     sql_filename = to_sql_filename(entry.name)
     target_path = SOLUTIONS_DIR / section / sql_filename
     target_path = _ensure_unique_path(target_path)

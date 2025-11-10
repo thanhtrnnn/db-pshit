@@ -1,0 +1,58 @@
+SQL94 - Consecutive number
+SQL95 - Big Countries
+SQL96 - Replace Employee ID with unique identify (SQL Server)
+SQL97 - Average time of process per machine
+SQL98 - Delete duplicate emails
+SQL99 - Find custom referee
+SQL100 - Recycle and low fat product
+SQL101 - Not boring movie
+SQL102 - Rising temperature
+SQL103 - Liệt kê 2 khóa học theo tên giảng viên (sắp xếp theo tên giảm dần)     
+SQL104 - Tìm các lớp học đang được mở
+SQL105 - Liệt kê 2 khóa học theo tên giảng viên (sắp xếp tăng dần)
+SQL106 - Tìm firstname của Instructor
+SQL107 - Các khóa học cấp độ 400 (4xx) của CSE đang mở là gì
+SQL108 - Tìm lớp học của thầy Levy
+SQL109 - Quản lý product
+SQL110 - Những khóa học nào có tên bắt đầu bằng "Introduction"
+SQL111 - Sửa tiêu đề gõ sai
+SQL112 - Hiển thị tên khóa học và độ dài của nó
+SQL113 - Chuẩn hóa tên các khóa học
+SQL114 - Những instructors nào bắt đầu dạy trước 1990
+SQL115 - Những instructors nào bắt đầu dạy trước thời điểm hiện tại
+SQL116 - Những instructors bắt đầu dạy vào hoặc sau ngày 1 tháng 1 của 20 năm trước
+SQL117 - Sửa dữ liệu sai trong bảng
+SQL118 - Thiết kế cơ sở dữ liệu với bảng đăng ký khóa học
+SQL119 - Chỉnh sửa bảng cơ sở dữ liệu với kiểu dữ liệu sai
+SQL120 - Tạo procedure lấy danh sách nhân viên
+SQL125 - Cập nhật kết quả sinh viên
+SQL126 - Confirmation Rate
+SQL127 - Number of Unique Subject taught by each teacher
+SQL128 - Class more than 5 student
+SQL129 - Invalid Tweets
+SQL130 - Product Sales Analysis
+SQL131 - Customer who bought all product
+SQL132 - Làm quen với LearnSQL
+SQL133 - Average Selling Price
+SQL134 - Movie rating
+SQL136 - Students and examinations
+SQL137 - Managers with at least 5 direction report
+SQL138 - Fix name in a table
+SQL139 - Employee bonus
+SQL-2831
+SQL-2836
+SQL149
+SQL147
+SQL148
+SQL150
+SQL151
+SQL152
+SQL153
+SQL155
+SQL156
+SQL1606
+SQL1611
+SQL1612
+SQL1615
+SQL1617
+SQL162

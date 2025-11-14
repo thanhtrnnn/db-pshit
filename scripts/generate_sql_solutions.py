@@ -11,16 +11,15 @@ except Exception:
 # Mapping of section identifiers (folder names) to keywords or classifier hints
 SECTIONS = {
     '01_modification': ['cập nhật', 'xóa', 'chèn', 'insert', 'delete', 'update', 'thêm', 'create table', 'alter', 'drop', 'merge'],
-    '02_aggregation_simple': ['tổng số', 'bao nhiêu', 'count', 'average', 'trung bình', 'sum', 'ratio'],
-    '03_aggregation_grouped': ['mỗi', 'per', 'theo', 'group', 'by department', 'phân loại', 'category'],
-    '04_window_functions': ['top', 'cao nhất', 'lớn nhất', 'nhỏ nhất', 'rank', 'row_number', 'dense_rank', 'lag', 'lead', 'running'],
-    '05_pivoting': ['pivot', 'CASE WHEN', 'mùa', 'season', 'matrix', 'cột riêng'],
-    '06_set_operations': ['intersect', 'union', 'except', 'both', 'chung', 'loại trừ'],
-    '07_relational_division': ['tất cả', 'all', 'cả hai', 'mọi', 'đều', 'all products', 'both categories'],
-    '08_range_join': ['khoảng', 'between', 'effective', 'date range', '>=', '<=', 'window của'],
-    '09_filtering': ['trong tuần', 'tháng', 'năm', 'gần đây', 'recent', 'ngày', 'date', 'substring', 'trim', 'normalize', 'chuẩn hóa', 'fix name'],
-    '10_retrieval': ['liệt kê', 'danh sách', 'join', 'và', 'ở đâu', 'who', 'which'],
-    '11_complex': ['thủ tục', 'procedure', 'function', 'phức tạp', 'nhiều bước', 'comprehensive'],
+    '02_aggregation': ['tổng số', 'bao nhiêu', 'count', 'average', 'trung bình', 'sum', 'ratio', 'mỗi', 'per', 'theo', 'group', 'by department', 'phân loại', 'category'],
+    '03_window_functions': ['top', 'cao nhất', 'lớn nhất', 'nhỏ nhất', 'rank', 'row_number', 'dense_rank', 'lag', 'lead', 'running'],
+    '04_pivoting': ['pivot', 'CASE WHEN', 'mùa', 'season', 'matrix', 'cột riêng'],
+    '05_set_operations': ['intersect', 'union', 'except', 'both', 'chung', 'loại trừ'],
+    '06_relational_division': ['tất cả', 'all', 'cả hai', 'mọi', 'đều', 'all products', 'both categories'],
+    '07_complex_join': ['khoảng', 'between', 'effective', 'date range', '>=', '<=', 'window của'],
+    '08_filtering': ['trong tuần', 'tháng', 'năm', 'gần đây', 'recent', 'ngày', 'date', 'substring', 'trim', 'normalize', 'chuẩn hóa', 'fix name'],
+    '09_retrieval': ['liệt kê', 'danh sách', 'join', 'và', 'ở đâu', 'who', 'which'],
+    '10_complex': ['cte', 'subquery', 'thủ tục', 'procedure', 'function', 'phức tạp', 'nhiều bước', 'comprehensive'],
 }
 
 TEMPLATE_SNIPPETS = {
@@ -30,14 +29,13 @@ UPDATE <table>
 SET <column> = <expression>
 WHERE <condition>;
 """,
-    '02_aggregation_simple': """-- Simple aggregation template
-SELECT COUNT(*) AS total_records
-FROM <table>;
-""",
-    '03_aggregation_grouped': """-- Grouped aggregation template
-SELECT <group_cols>, COUNT(*) AS cnt
+    '02_aggregation': """-- Aggregation template
+SELECT
+  <group_cols_optional>,
+  <aggregate_expression> AS metric
 FROM <table>
-GROUP BY <group_cols>;
+[WHERE <filter_condition>]
+[GROUP BY <group_cols_optional>];
 """,
     '04_window_functions': """-- Window function template
 SELECT * FROM (
@@ -68,7 +66,7 @@ HAVING COUNT(DISTINCT item_id) = (
     FROM items
 );
 """,
-    '08_range_join': """-- Range join template
+    '08_complex_join': """-- Range join template
 SELECT f.*, p.price
 FROM facts f
 JOIN prices p ON p.product_id = f.product_id
@@ -86,10 +84,30 @@ JOIN <table_b> b ON b.<fk> = a.<pk>
 WHERE <predicate>;
 """,
     '11_complex': """-- Complex logic placeholder
--- Combine multiple techniques as required for the problem statement.
-SELECT ...;
+WITH step_one AS (
+  SELECT ...
+),
+step_two AS (
+  SELECT ...
+)
+SELECT ...
+FROM step_two;
 """,
 }
+
+
+def _has_structural_complexity(content_lower: str) -> bool:
+    """Heuristics to detect problems likely requiring multi-stage solutions."""
+    if re.search(r"\bwith\s+[a-z0-9_]+\s+as\s*\(", content_lower):
+        return True
+    if len(re.findall(r"\(\s*select\b", content_lower)) >= 2:
+        return True
+    join_hits = re.findall(r"\bjoin\b", content_lower)
+    if len(join_hits) >= 2 and re.search(r"\bjoin\b[^\n]*\bon\b[^\n]*(>=|<=|<>| between | and .+ and )", content_lower):
+        return True
+    if len(re.findall(r"\bselect\b", content_lower)) >= 4:
+        return True
+    return False
 
 PROBLEMS_DIR = Path('problems')
 SOLUTIONS_DIR = Path('solutions')
@@ -118,7 +136,12 @@ def extract_problem_text(path: Path) -> str:
 
 def classify(filename_lower: str, content_lower: str):
     # Prefer content keywords; fallback to filename
+    mod_keywords = SECTIONS['01_modification']
+    if any(kw in content_lower for kw in mod_keywords) or any(kw in filename_lower for kw in mod_keywords):
+        return '01_modification'
     haystacks = [content_lower, filename_lower]
+    if _has_structural_complexity(content_lower):
+        return '11_complex'
     for hs in haystacks:
         for section, keywords in SECTIONS.items():
             for kw in keywords:
@@ -130,7 +153,7 @@ def classify(filename_lower: str, content_lower: str):
     if any(w in content_lower for w in ['row_number', 'rank', 'dense_rank', 'top 3', 'top 5', 'lag', 'lead']):
         return '04_window_functions'
     if any(w in content_lower for w in ['between', 'effective date', 'hiệu lực', 'start_date', 'end_date']):
-        return '08_range_join'
+        return '08_complex_join'
     if any(w in content_lower for w in ['tất cả', 'bought all', 'all products', 'mọi sản phẩm']):
         return '07_relational_division'
     if any(w in content_lower for w in ['không có trong', 'nhưng không', 'except', 'anti join', 'intersect']):
@@ -138,14 +161,14 @@ def classify(filename_lower: str, content_lower: str):
     if any(w in content_lower for w in ['viết hoa', 'normalize', 'chuẩn hóa', 'capitalize', 'substring', 'trim']):
         return '09_filtering'
     if 'group by' in content_lower:
-        return '03_aggregation_grouped'
+        return '02_aggregation'
     if 'count(' in content_lower or 'sum(' in content_lower:
-        return '02_aggregation_simple'
+        return '02_aggregation'
     # Fallbacks based on filename cues
     if 'top' in filename_lower or 'cao nhất' in filename_lower:
         return '04_window_functions'
     if 'trung bình' in filename_lower or 'average' in filename_lower:
-        return '02_aggregation_simple'
+        return '02_aggregation'
     return '10_retrieval'
 
 # Sanitize filename to .sql
@@ -188,16 +211,15 @@ def _ensure_unique_path(path: Path) -> Path:
 
 RATIONALES = {
     '01_modification': 'Tác vụ DML/DDL (INSERT/UPDATE/DELETE/CREATE). Cần chỉ rõ điều kiện để tránh ảnh hưởng ngoài ý muốn.',
-    '02_aggregation_simple': 'Tính toán một tổng hợp duy nhất cho toàn bộ tập dữ liệu (COUNT/SUM/AVG không có GROUP BY).',
-    '03_aggregation_grouped': 'Tổng hợp theo nhóm với GROUP BY và các phép đo theo từng partition.',
+    '02_aggregation': 'Tổng hợp dữ liệu (COUNT/SUM/AVG) với hoặc không có GROUP BY.',
     '04_window_functions': 'Sử dụng hàm cửa sổ (ROW_NUMBER, RANK, LAG...) để xếp hạng hoặc soi liền kề.',
     '05_pivoting': 'Biến hàng thành cột bằng tổng hợp có điều kiện hoặc PIVOT.',
     '06_set_operations': 'Dùng UNION/INTERSECT/EXCEPT để so sánh hoặc giao/hiệu giữa các tập kết quả.',
     '07_relational_division': 'Bài toán “đã có tất cả” với NOT EXISTS kép hoặc HAVING COUNT bằng tổng yêu cầu.',
-    '08_range_join': 'JOIN dựa trên điều kiện bất đẳng thức hoặc khoảng thời gian hiệu lực.',
+    '08_complex_join': 'JOIN dựa trên điều kiện bất đẳng thức hoặc khoảng thời gian hiệu lực.',
     '09_filtering': 'Tập trung vào biểu thức WHERE phức tạp: xử lý ngày/thời gian hoặc chuẩn hóa chuỗi.',
-    '10_retrieval': 'Truy xuất dữ liệu bằng SELECT/JOIN cơ bản với điều kiện bằng (=).',
-    '11_complex': 'Kết hợp nhiều kỹ thuật nâng cao (ví dụ window + pivot) hoặc logic lồng nhau phức tạp.',
+    '10_retrieval': 'Truy xuất dữ liệu bằng SELECT/JOIN cơ bản với điều kiện bằng (=) và có thể IN/EXISTS đơn giản.',
+    '11_complex': 'Bài toán có CTE, nhiều subquery hoặc JOIN điều kiện phức tạp nê n cần nhiều bước trung gian.',
 }
 
 count = 0

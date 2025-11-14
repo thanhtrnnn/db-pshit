@@ -1,0 +1,17 @@
+ -- Tables: NHANVIEN, PHANCONG, DEAN
+ -- Technique: JOIN, GROUP BY, HAVING (dialect: Sql Server)
+
+ SELECT
+  N.HONV + ' ' + N.TENLOT + ' ' + N.TENNV AS [Nhân viên tham gia trên 2 đề án ở TP.HCM]
+ FROM
+  NHANVIEN AS N
+ JOIN
+  PHANCONG AS PC ON N.MANV = PC.MA_NVIEN
+ JOIN
+  DEAN AS DA ON PC.MADA = DA.MADA
+ WHERE
+  DA.DDIEM_DA = N'TP.HCM'
+ GROUP BY
+  N.HONV, N.TENLOT, N.TENNV, N.MANV
+ HAVING
+  COUNT(DISTINCT DA.MADA) >= 2;

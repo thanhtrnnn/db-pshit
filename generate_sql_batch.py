@@ -16,7 +16,7 @@ Usage (PowerShell):
     python generate_sql_batch.py --limit 3 --force
 
 Note:
-    Requires GOOGLE_API_KEY in environment & installed dependencies.
+    Requires GOOGLE_SQL_API_KEY (fallback: GOOGLE_API_KEY) and optional GOOGLE_TAXONOMY_API_KEY in environment & installed dependencies.
 """
 from __future__ import annotations
 import argparse
@@ -25,7 +25,7 @@ import os
 from pathlib import Path
 from typing import Tuple
 import time
-# Note: Import of ai_client is deferred to runtime to support --dry-run without requiring GOOGLE_API_KEY.
+# Note: Import of ai_client is deferred to runtime to support --dry-run without requiring GOOGLE_SQL_API_KEY.
 
 ROOT = Path(__file__).parent
 PROBLEMS_DIR = ROOT / "problems"
@@ -35,16 +35,15 @@ IGNORE_FILE = ROOT / "ignore.txt"
 
 SECTION_MAP = {
     "modification": "01_modification",
-    "aggregation_simple": "02_aggregation_simple",
-    "aggregation_grouped": "03_aggregation_grouped",
-    "window_functions": "04_window_functions",
-    "pivoting": "05_pivoting",
-    "set_operations": "06_set_operations",
-    "relational_division": "07_relational_division",
-    "range_join": "08_range_join",
-    "filtering": "09_filtering",
-    "retrieval": "10_retrieval",
-    "complex": "11_complex",
+    "aggregation": "02_aggregation",
+    "window_functions": "03_window_functions",
+    "pivoting": "04_pivoting",
+    "set_operations": "05_set_operations",
+    "relational_division": "06_relational_division",
+    "complex_join": "07_complex_join",
+    "filtering": "08_filtering",
+    "retrieval": "09_retrieval",
+    "complex": "10_complex",
 }
 
 ALLOWED_TAXONOMY = set(SECTION_MAP.keys())
@@ -77,6 +76,13 @@ def guess_taxonomy_hint(html: str) -> str:
     lower = html.lower()
     if any(k in lower for k in ("insert", "update", "delete", "create table", "alter table", "drop table", " merge ")):
         return "modification"
+    cte_found = re.search(r"\bwith\s+[a-z0-9_]+\s+as\s*\(", lower)
+    subquery_count = len(re.findall(r"\(\s*select\b", lower))
+    join_count = len(re.findall(r"\bjoin\b", lower))
+    complex_join = re.search(r"\bjoin\b[^\n]*\bon\b[^\n]*(>=|<=|<>| between | and .+ and )", lower)
+    long_solution = lower.count("\n") > 60 or len(re.findall(r"\bselect\b", lower)) >= 4
+    if cte_found or subquery_count >= 2 or (complex_join and join_count >= 2) or long_solution:
+        return "complex"
     if re.search(r"\bover\s*\(", lower) or any(func in lower for func in ("row_number", "dense_rank", "lag", "lead")):
         return "window_functions"
     if "sum(case" in lower or " pivot" in lower:
@@ -86,15 +92,15 @@ def guess_taxonomy_hint(html: str) -> str:
     if (" not exists" in lower and (" all " in lower or " every " in lower)) or "having count" in lower and "distinct" in lower:
         return "relational_division"
     if " between " in lower and " join " in lower:
-        return "range_join"
+        return "complex_join"
     if re.search(r"dateadd|datediff|getdate|extract\(|to_date|interval|year\(|month\(|day\(|datediff", lower):
         return "filtering"
     if re.search(r"upper\(|lower\(|trim\(|substring\(|replace\(|regexp|len\(", lower):
         return "filtering"
     if "group by" in lower:
-        return "aggregation_grouped"
+        return "aggregation"
     if re.search(r"count\s*\(|sum\s*\(|avg\s*\(|min\s*\(|max\s*\(", lower):
-        return "aggregation_simple"
+        return "aggregation"
     if " join " in lower or " exists" in lower or " in (" in lower:
         return "retrieval"
     return "retrieval"
@@ -108,11 +114,13 @@ def _canonical_taxonomy(name: str | None) -> str | None:
     synonyms = {
         "dml": "modification",
         "ddl": "modification",
-        "counting": "aggregation_simple",
-        "aggregation": "aggregation_grouped",
-        "aggregations": "aggregation_grouped",
-        "counting_grouping": "aggregation_grouped",
-        "grouping": "aggregation_grouped",
+        "counting": "aggregation",
+        "aggregation": "aggregation",
+        "aggregations": "aggregation",
+        "aggregation_simple": "aggregation",
+        "aggregation_grouped": "aggregation",
+        "counting_grouping": "aggregation",
+        "grouping": "aggregation",
         "topn_window": "window_functions",
         "window": "window_functions",
         "windowing": "window_functions",
@@ -124,9 +132,9 @@ def _canonical_taxonomy(name: str | None) -> str | None:
         "set": "set_operations",
         "set_logic": "set_operations",
         "division": "relational_division",
-        "range": "range_join",
-        "join_range": "range_join",
-        "range_join": "range_join",
+        "range": "complex_join",
+        "join_range": "complex_join",
+        "complex_join": "complex_join",
         "filtering_dates": "filtering",
         "string_normalization": "filtering",
         "date_filtering": "filtering",
@@ -239,7 +247,7 @@ def main(limit: int, force: bool, dry_run: bool, replace_index: bool):
         if dry_run:
             data = _mock_generate_sql_solution(html_content, problem_id, taxonomy_hint)
         else:
-            # Lazy import to avoid requiring GOOGLE_API_KEY during dry runs
+            # Lazy import to avoid requiring GOOGLE_SQL_API_KEY during dry runs
             from ai_client import generate_sql_solution  # type: ignore
             data = generate_sql_solution(html_content, problem_id, taxonomy_hint)
             time.sleep(6)  # Cooldown to withstand rate limits

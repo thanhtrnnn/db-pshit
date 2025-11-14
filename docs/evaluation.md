@@ -1,88 +1,75 @@
 # SQL Problem Evaluation Criteria
 
-This document defines the 11 categories for classifying SQL problems and the decision flow for selecting the correct one.
+This document defines the 10 categories for classifying SQL problems. The decision flow is crucial for distinguishing truly complex problems from simpler ones.
 
 ## Decision Flow (Triage)
 
-To classify a problem, follow this triage process. Stop as soon as you find a match.
+To classify a problem, follow this logic. **Do not stop at the first match.**
 
-1.  **Modification Check:**
+1.  **Check for Modification:**
     * Does the problem require `INSERT`, `UPDATE`, `DELETE`, `CREATE`, `ALTER`, or `DROP`?
-    * **YES** -> `modification` (Stop).
+    * **YES** -> `modification`. (This is a unique path. Stop here).
 
-2.  **Aggregation Check:**
-    * Does the problem use an aggregate function (e.g., `COUNT`, `SUM`, `AVG`)?
-    * **YES, and *no* `GROUP BY`** -> `aggregation_simple`.
-    * **YES, and *has* `GROUP BY`** -> `aggregation_grouped`.
-    * *(Caveat: If it has `GROUP BY` but also `SUM(CASE...)` to pivot, skip. `pivoting` is more specific).*
+2.  **Scan for Structural Complexity (forces `complex`):**
+    * These traits immediately force the problem into the `complex` bucket, even if no other advanced technique appears:
+        * **CTE usage:** any `WITH ... AS (...)` block counts. 2+ CTE exist -> `complex`.
+        * **Heavy subquerying:** ANY SUBQUERIES IN THE QUERY (SELECT inside FROM/ GROUP BY/ HAVING...) -> `complex`
+        * **Complex joins:** multi-table joins whose conditions mix inequalities, OR chains, or cross-table calculations (not just simple FK equality).
+        * **Very long solutions:** statements that naturally span dozens of lines/steps before the final `SELECT`.
+    * If any bullet above is true -> `complex`. (Stop here).
 
-3.  **Analytics Check (Keyword):**
-    * Does the problem use a window function (anything with `OVER(...)`, e.g., `ROW_NUMBER`, `LAG`, `SUM() OVER`)?
-    * **YES** -> `window_functions`.
+3.  **Identify Advanced Techniques:**
+    * If still undecided, look for any following specific patterns to route to their dedicated categories:
+        * `window_functions` (Any `OVER()` clause)
+        * `pivoting` (Any `SUM(CASE...)` or `PIVOT`)
+        * `set_operations` (Any `UNION`, `UNION ALL`, `INTERSECT`, `EXCEPT`)
+        * `relational_division` ("For all" logic)
+        * `complex_join` (any `JOIN`/ `LEFT JOIN`/ `RIGHT JOIN`/ `CROSS JOIN` among >= 2 tables together)
 
-4.  **Reshaping Check:**
-    * Does the problem transform rows into columns (e.g., `SUM(CASE WHEN...)` or `PIVOT`)?
-    * **YES** -> `pivoting`.
+4.  **Single Advanced Technique:**
+    * If *exactly one* advanced technique from Step 2 was identified:
+    * **YES** -> Assign that category (e.g., `window_functions`, `pivoting`, etc.). (Stop).
 
-5.  **Set Logic Check:**
-    * Does the problem use `UNION`, `INTERSECT`, or `EXCEPT` as the primary logic?
-    * **YES** -> `set_operations`.
-    * Does it solve a "for all" problem (e.g., "student who took *all* courses")?
-    * **YES** -> `relational_division`.
-    * Is the `JOIN` condition a range (`BETWEEN`) or inequality (`>`, `<`) instead of equals (`=`)?
-    * **YES** -> `range_join`.
+5.  **Check Simple Categories (If no advanced techniques found):**
+    * *If not aggregation*, is the *main challenge* the `WHERE` clause (ANY date/string processing logic)?
+    * **YES** -> `filtering`. (Stop).
+    * *If none of the above*, does the query's main purpose involve `GROUP BY` or aggregates like `COUNT()`, `SUM()`?
+    * **YES** -> `aggregation`. (Stop).
 
-6.  **Filtering Check:**
-    * If none of the above, is the *main challenge* in the `WHERE` clause (e.g., complex `DATEDIFF`, `SUBSTRING` logic)?
-    * **YES** -> `filtering`.
-
-7.  **Default & Complex Check:**
-    * Is the problem a standard `SELECT...WHERE...JOIN` (using `=`) for simple lookups?
-    * **YES** -> `retrieval` (This is the default category).
-    * Does the problem require combining 2+ *advanced* techniques (e.g., `window_functions` + `pivoting`) or have exceptionally complex, nested logic?
-    * **YES** -> `complex` (This is the final catch-all).
+6.  **Assign Default:**
+    * *If none of the above apply*, the query is a standard lookup.
+    * **YES** -> `retrieval`.
 
 ---
 
-## Category Definitions (11 Categories)
+## Category Definitions (10 Categories)
 
 ### 1. Modification
 * **`modification`** (DML/DDL)
     * **Description:** Changes data (`INSERT`, `UPDATE`, `DELETE`) or structure (`CREATE`, `ALTER`, `DROP`).
 
 ### 2. Aggregation
-* **`aggregation_simple`** (Simple Aggregation)
-    * **Description:** Returns a single aggregate value for the entire result set.
-    * **Key Technique:** `COUNT`, `SUM`, etc., *without* a `GROUP BY` clause.
-* **`aggregation_grouped`** (Grouped Aggregation)
-    * **Description:** Summarizes data into groups.
-    * **Key Technique:** `GROUP BY`, often with `HAVING`.
+* **`aggregation`** (Merged Aggregation)
+    * **Description:** Summarizes data. Includes both single (`COUNT(*)`) and grouped (`GROUP BY`) aggregations.
 
-### 3. Analytics & Reshaping
+### 3. Advanced Analytics & Reshaping
 * **`window_functions`** (Window Functions)
-    * **Description:** (Merges `topn_window` and `window`). Performs inter-row calculations or ranking.
-    * **Key Technique:** Any function using `OVER(...)`, including `ROW_NUMBER()`, `RANK()`, `LAG()`, `SUM() OVER()`.
+    * **Description:** Ranking (`ROW_NUMBER`) or inter-row calculations (`LAG`, `LEAD`, `SUM() OVER`).
 * **`pivoting`** (Pivoting)
-    * **Description:** Transforms unique row values into distinct columns.
-    * **Key Technique:** Conditional aggregation (`SUM(CASE WHEN...)`) or `PIVOT`.
+    * **Description:** Transforms rows into columns (`SUM(CASE WHEN...)` or `PIVOT`).
 
 ### 4. Advanced Set Logic
 * **`set_operations`** (Set Operators)
-    * **Description:** Compares or combines two or more result sets.
-    * **Key Technique:** `UNION`, `INTERSECT`, `EXCEPT`.
+    * **Description:** Uses `UNION`, `INTERSECT`, `EXCEPT` as the primary logic.
 * **`relational_division`** (Relational Division)
-    * **Description:** Solves "for all" problems (e.g., "finds who bought *all* products").
-    * **Key Technique:** Often implemented with `GROUP BY...HAVING COUNT` or nested `NOT EXISTS`.
-* **`range_join`** (Range Join)
-    * **Description:** Connects tables based on a range or inequality.
-    * **Key Technique:** `JOIN` condition using `BETWEEN`, `>`, or `<`.
+    * **Description:** Solves "for all" problems (e.g., "who bought *all* products").
+* **`complex_join`** (Range Join)
+    * **Description:** `JOIN` condition uses `BETWEEN` or inequalities (`>`, `<`).
 
 ### 5. Default & Complex
 * **`filtering`** (Complex Filtering)
-    * **Description:** (Merges `filtering_dates` and `filtering_strings`). The main challenge is the `WHERE` clause.
-    * **Key Technique:** Complex logic using `DATEDIFF`, `SUBSTRING`, `LIKE`, `LOWER`/`TRIM`.
+    * **Description:** The main challenge is the `WHERE` clause (complex date logic, string parsing).
 * **`retrieval`** (Basic Retrieval)
-    * **Description:** The "default" category for simple information lookups.
-    * **Key Technique:** Standard `SELECT`, `WHERE`, and equality-based `JOIN`s.
+    * **Description:** Default bucket. Standard `SELECT-WHERE-JOIN` lookups with straightforward equality joins/filters. Allows single-layer `IN` / `EXISTS` filters, but no CTEs or deeply nested subqueries.
 * **`complex`** (Complex)
-    * **Description:** Requires 2+ *advanced* techniques (e.g., `window` + `pivot`) or has exceptionally complex, nested logic.
+    * **Description:** Any solution that relies on CTEs, 2+ stacked subqueries, complex conditional joins, or is long enough to require multiple staged steps.

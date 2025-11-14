@@ -1,0 +1,17 @@
+ -- Tables: NHANVIEN, PHONGBAN
+ -- Technique: Common Table Expression (CTE) / TOP WITH TIES (dialect: Sql Server)
+ SELECT TOP 1 WITH TIES
+  PB.MAPHG,
+  PB.TENPHG
+ FROM
+  NHANVIEN AS NV
+ JOIN
+  PHONGBAN AS PB
+ ON
+  NV.PHG = PB.MAPHG
+ GROUP BY
+  PB.MAPHG,
+  PB.TENPHG
+ ORDER BY
+  AVG(NV.LUONG) DESC;
+ 

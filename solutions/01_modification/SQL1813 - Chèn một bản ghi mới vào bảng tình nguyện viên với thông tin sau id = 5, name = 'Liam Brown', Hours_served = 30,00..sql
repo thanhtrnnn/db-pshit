@@ -1,0 +1,5 @@
+ -- Tables: volunteers
+ -- Technique: modification (dialect: Mysql)
+
+ INSERT INTO volunteers (id, name, hours_served)
+ VALUES (5, 'Liam Brown', 30.00);

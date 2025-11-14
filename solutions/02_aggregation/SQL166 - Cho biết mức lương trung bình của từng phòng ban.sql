@@ -1,0 +1,18 @@
+ -- Tables: NHANVIEN, PHONGBAN
+ -- Technique: GROUP BY, JOIN (dialect: Sql Server)
+
+ SELECT
+  PB.MAPHG,
+  PB.TENPHG,
+  AVG(NV.LUONG) AS [Lương trung bình]
+ FROM
+  NHANVIEN AS NV
+ JOIN
+  PHONGBAN AS PB
+ ON
+  NV.PHG = PB.MAPHG
+ GROUP BY
+  PB.MAPHG,
+  PB.TENPHG
+ ORDER BY
+  PB.MAPHG;

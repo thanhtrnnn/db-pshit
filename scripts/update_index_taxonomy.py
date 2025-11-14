@@ -4,29 +4,31 @@ from __future__ import annotations
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-INDEX_PATH = ROOT / "solutions" / "index.md"
+SOLUTIONS_DIR = ROOT / "solutions"
+INDEX_PATH = SOLUTIONS_DIR / "index.md"
 
 SECTION_MAP = {
     "modification": "01_modification",
-    "aggregation_simple": "02_aggregation_simple",
-    "aggregation_grouped": "03_aggregation_grouped",
-    "window_functions": "04_window_functions",
-    "pivoting": "05_pivoting",
-    "set_operations": "06_set_operations",
-    "relational_division": "07_relational_division",
-    "range_join": "08_range_join",
-    "filtering": "09_filtering",
-    "retrieval": "10_retrieval",
-    "complex": "11_complex",
+    "aggregation": "02_aggregation",
+    "window_functions": "03_window_functions",
+    "pivoting": "04_pivoting",
+    "set_operations": "05_set_operations",
+    "relational_division": "06_relational_division",
+    "complex_join": "07_complex_join",
+    "filtering": "08_filtering",
+    "retrieval": "09_retrieval",
+    "complex": "10_complex",
 }
+
+FOLDER_TO_SECTION = {folder: label for label, folder in SECTION_MAP.items()}
 
 ALIASES = {
     "01_modification": "modification",
-    "01_counting": "aggregation_simple",
-    "01_counting_grouping": "aggregation_grouped",
-    "02_aggregation_simple": "aggregation_simple",
-    "02_grouping": "aggregation_grouped",
-    "03_aggregation_grouped": "aggregation_grouped",
+    "01_counting": "aggregation",
+    "01_counting_grouping": "aggregation",
+    "02_aggregation_simple": "aggregation",
+    "02_grouping": "aggregation",
+    "03_aggregation_grouped": "aggregation",
     "03_joins_simple": "retrieval",
     "04_topn_window": "window_functions",
     "04_window_functions": "window_functions",
@@ -35,38 +37,38 @@ ALIASES = {
     "05_string_normalization": "filtering",
     "05_pivoting": "pivoting",
     "06_set_difference": "set_operations",
-    "06_range_join": "range_join",
+    "06_complex_join": "complex_join",
     "07_relational_division": "relational_division",
     "07_set_difference": "set_operations",
     "08_division": "relational_division",
-    "08_range_join": "range_join",
+    "08_complex_join": "complex_join",
     "09_topn_window": "window_functions",
     "09_filtering": "filtering",
     "09_dml": "modification",
     "10_conditional_pivot": "pivoting",
     "10_string_normalization": "filtering",
     "10_retrieval": "retrieval",
-    "11_grouping": "aggregation_grouped",
+    "11_grouping": "aggregation",
     "11_dml": "modification",
     "11_string_normalization": "filtering",
     "11_complex": "complex",
     "12_mixed": "complex",
     "dml": "modification",
-    "counting": "aggregation_simple",
-    "grouping": "aggregation_grouped",
-    "counting_grouping": "aggregation_grouped",
+    "counting": "aggregation",
+    "grouping": "aggregation",
+    "counting_grouping": "aggregation",
     "joins_simple": "retrieval",
     "topn_window": "window_functions",
     "conditional_pivot": "pivoting",
     "set_difference": "set_operations",
     "division": "relational_division",
-    "range_join": "range_join",
+    "complex_join": "complex_join",
     "filtering_dates": "filtering",
     "string_normalization": "filtering",
     "mixed": "complex",
 }
 
-DEFAULT_AGG_SECTION = "aggregation_grouped"
+DEFAULT_AGG_SECTION = "aggregation"
 
 
 def detect_counting_or_grouping(sql_path: Path) -> str:
@@ -75,8 +77,28 @@ def detect_counting_or_grouping(sql_path: Path) -> str:
     except FileNotFoundError:
         return DEFAULT_AGG_SECTION
     if "group by" in text:
-        return "aggregation_grouped"
-    return "aggregation_simple"
+        return "aggregation"
+    return "aggregation"
+
+
+def _folder_to_section(folder_name: str | None) -> str | None:
+    if not folder_name:
+        return None
+    folder_name = folder_name.strip()
+    if folder_name in FOLDER_TO_SECTION:
+        return FOLDER_TO_SECTION[folder_name]
+    alias = ALIASES.get(folder_name)
+    if alias in SECTION_MAP:
+        return alias
+    return None
+
+
+def _resolve_sql_path(rel_path: str, basename: str) -> Path | None:
+    candidate = SOLUTIONS_DIR / Path(rel_path)
+    if candidate.exists():
+        return candidate
+    matches = list(SOLUTIONS_DIR.rglob(basename))
+    return matches[0] if matches else None
 
 
 def harmonize_index() -> None:
@@ -98,22 +120,39 @@ def harmonize_index() -> None:
             new_lines.append(raw_line)
             continue
         problem, section_label, rel_path = parts
-        canonical = ALIASES.get(section_label, section_label)
-        sql_basename = Path(rel_path).name
-        sql_path = ROOT / "solutions" / Path(rel_path)
+        rel_path = rel_path.replace("\\", "/")
+        rel_path_obj = Path(rel_path)
+        sql_basename = rel_path_obj.name
+        sql_path = _resolve_sql_path(rel_path, sql_basename)
+        canonical = None
+        normalized_rel_path = rel_path_obj.as_posix()
 
-        if canonical in {"aggregation_simple", "aggregation_grouped", "counting_grouping"}:
-            canonical = detect_counting_or_grouping(sql_path)
-        if sql_path.exists():
+        if sql_path:
+            relative = sql_path.relative_to(SOLUTIONS_DIR)
+            normalized_rel_path = relative.as_posix()
+            folder_name = relative.parts[0] if relative.parts else None
+            canonical = _folder_to_section(folder_name)
+
+        if not canonical:
+            canonical = ALIASES.get(section_label, section_label)
+
+        if canonical in {"aggregation_simple", "aggregation_grouped", "counting_grouping", "aggregation"}:
+            target_path = sql_path or (SOLUTIONS_DIR / normalized_rel_path)
+            canonical = detect_counting_or_grouping(target_path)
+
+        if sql_path:
             lowered = sql_path.read_text(encoding="utf-8", errors="ignore").lower()
             if any(keyword in lowered for keyword in (" insert ", " update ", " delete ", " merge ", " create ", " alter ", " drop ")):
                 canonical = "modification"
+
         if canonical not in SECTION_MAP:
             canonical = "retrieval"
 
-        folder = SECTION_MAP[canonical]
-        new_rel_path = f"{folder}/{sql_basename}"
-        new_lines.append(f"{problem} | {canonical} | {new_rel_path}")
+        if not sql_path:
+            folder = SECTION_MAP[canonical]
+            normalized_rel_path = f"{folder}/{sql_basename}"
+
+        new_lines.append(f"{problem} | {canonical} | {normalized_rel_path}")
 
     INDEX_PATH.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
 

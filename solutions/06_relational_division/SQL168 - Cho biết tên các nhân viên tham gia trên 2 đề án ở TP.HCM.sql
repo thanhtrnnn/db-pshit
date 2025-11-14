@@ -2,7 +2,7 @@
  -- Technique: JOIN, GROUP BY, HAVING (dialect: Sql Server)
 
  SELECT
-  N.HONV + ' ' + N.TENLOT + ' ' + N.TENNV AS [Nhân viên tham gia trên 2 đề án ở TP.HCM]
+  N.HONV + ' ' + N.TENLOT + ' ' + N.TENNV AS 'Nhân viên tham gia trên 2 đề án ở TP.HCM'
  FROM
   NHANVIEN AS N
  JOIN

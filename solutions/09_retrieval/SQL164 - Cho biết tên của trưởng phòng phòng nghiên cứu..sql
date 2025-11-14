@@ -2,7 +2,7 @@
 --- Technique: retrieval (dialect: Sql Server)
 
 SELECT
-    N.HONV + N.TENLOT + N.TENNV AS [Trưởng phòng nghiên cứu]
+    N.HONV + N.TENLOT + N.TENNV AS 'Trưởng phòng nghiên cứu'
 FROM
     PHONGBAN AS PB
 JOIN

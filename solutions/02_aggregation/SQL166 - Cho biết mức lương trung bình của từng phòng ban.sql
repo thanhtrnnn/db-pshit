@@ -4,7 +4,7 @@
  SELECT
   PB.MAPHG,
   PB.TENPHG,
-  AVG(NV.LUONG) AS [Lương trung bình]
+  AVG(NV.LUONG) AS 'Lương trung bình'
  FROM
   NHANVIEN AS NV
  JOIN

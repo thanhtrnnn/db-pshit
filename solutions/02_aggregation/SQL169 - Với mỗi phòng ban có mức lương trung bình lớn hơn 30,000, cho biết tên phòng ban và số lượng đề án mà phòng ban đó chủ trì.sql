@@ -1,16 +1,1 @@
---- Tables: DEAN, PHONGBAN, NHANVIEN
---- Technique: JOIN, GROUP BY, HAVING (dialect: Sql Server)
-
-SELECT
-    PB.TENPHG,
-    COUNT(DA.MADA) AS "Số lượng đề án"
-FROM
-    PHONGBAN AS PB
-JOIN
-    NHANVIEN AS NV ON PB.MAPHG = NV.PHG
-GROUP BY
-    PB.MAPHG, PB.TENPHG
-HAVING
-    AVG(NV.LUONG) > 30000
-ORDER BY
-    PB.TENPHG;
+select company_name from companies group by company_name having count(distinct company_name) > 1

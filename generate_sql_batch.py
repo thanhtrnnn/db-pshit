@@ -36,7 +36,7 @@ IGNORE_FILE = ROOT / "ignore.txt"
 SECTION_MAP = {
     "modification": "01_modification",
     "aggregation": "02_aggregation",
-    "window_functions": "03_window_functions",
+    "grouping_having": "03_grouping_having",
     "pivoting": "04_pivoting",
     "set_operations": "05_set_operations",
     "relational_division": "06_relational_division",
@@ -83,8 +83,13 @@ def guess_taxonomy_hint(html: str) -> str:
     long_solution = lower.count("\n") > 60 or len(re.findall(r"\bselect\b", lower)) >= 4
     if cte_found or subquery_count >= 2 or (complex_join and join_count >= 2) or long_solution:
         return "complex"
-    if re.search(r"\bover\s*\(", lower) or any(func in lower for func in ("row_number", "dense_rank", "lag", "lead")):
-        return "window_functions"
+    if (
+        " having " in lower
+        or re.search(r"having\s+count", lower)
+        or re.search(r"\bover\s*\(", lower)
+        or any(func in lower for func in ("row_number", "dense_rank", "lag", "lead"))
+    ):
+        return "grouping_having"
     if "sum(case" in lower or " pivot" in lower:
         return "pivoting"
     if any(op in lower for op in (" union ", "intersect", " except")):
@@ -121,10 +126,8 @@ def _canonical_taxonomy(name: str | None) -> str | None:
         "aggregation_grouped": "aggregation",
         "counting_grouping": "aggregation",
         "grouping": "aggregation",
-        "topn_window": "window_functions",
-        "window": "window_functions",
-        "windowing": "window_functions",
-        "window_functions": "window_functions",
+        "grouping_having": "grouping_having",
+        "group_by_having": "grouping_having",
         "conditional_pivot": "pivoting",
         "pivot": "pivoting",
         "pivoting": "pivoting",

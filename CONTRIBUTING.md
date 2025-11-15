@@ -125,7 +125,7 @@ To improve SQL quality or taxonomy accuracy:
 └── solutions/
     ├── 01_modification/              # DML/DDL
     ├── 02_aggregation/               # GROUP BY patterns
-    ├── 03_window_functions/          # OVER() clause
+   ├── 03_grouping_having/           # GROUP BY + HAVING, top-N per nhóm (có thể dùng window)
     ├── 04_pivoting/                  # PIVOT / conditional aggregation
     ├── 05_set_operations/            # UNION / INTERSECT / EXCEPT
     ├── 06_relational_division/       # NOT EXISTS + ALL

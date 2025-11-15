@@ -1,1 +1,1 @@
-DELETE FROM Visitors WHERE id NOT IN (SELECT DISTINCT visitor_id FROM Visits);
+DELETE FROM Visitors WHERE id NOT IN (SELECT visitor_id FROM Visits);

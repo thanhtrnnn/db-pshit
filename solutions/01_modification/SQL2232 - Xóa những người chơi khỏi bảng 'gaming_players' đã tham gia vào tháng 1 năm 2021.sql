@@ -1,0 +1,1 @@
+DELETE FROM gaming_players WHERE YEAR(join_date) = 2021 AND MONTH(join_date) = 1;

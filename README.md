@@ -19,7 +19,7 @@ Solutions are automatically organized into taxonomy folders (e.g., `02_aggregati
 ├── solutions/                     # Generated SQL solutions, organized by taxonomy
 │   ├── 01_modification/          # DML/DDL operations (INSERT, UPDATE, DELETE, etc.)
 │   ├── 02_aggregation/           # GROUP BY, COUNT, SUM, AVG, etc.
-│   ├── 03_window_functions/      # ROW_NUMBER, RANK, LAG, LEAD, etc.
+│   ├── 03_grouping_having/      # GROUP BY + HAVING, top-N per nhóm, window hỗ trợ lọc
 │   ├── 04_pivoting/              # PIVOT, CASE aggregations, transpose logic
 │   ├── 05_set_operations/        # UNION, INTERSECT, EXCEPT
 │   ├── 06_relational_division/   # NOT EXISTS, ALL / EVERY patterns
@@ -124,7 +124,7 @@ The 10 canonical taxonomy sections:
 |-------|--------|-----------|
 | `modification` | `01_modification` | INSERT, UPDATE, DELETE, MERGE, DDL |
 | `aggregation` | `02_aggregation` | GROUP BY, COUNT, SUM, AVG, MIN, MAX |
-| `window_functions` | `03_window_functions` | ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD, OVER() |
+| `grouping_having` | `03_grouping_having` | GROUP BY + HAVING, top-N per group, optional window functions |
 | `pivoting` | `04_pivoting` | PIVOT, conditional aggregation, CASE in SELECT |
 | `set_operations` | `05_set_operations` | UNION, INTERSECT, EXCEPT |
 | `relational_division` | `06_relational_division` | NOT EXISTS with ALL, EVERY patterns |

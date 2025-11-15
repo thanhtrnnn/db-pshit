@@ -1,6 +1,7 @@
  -- Tables: athletes
- -- Technique: modification (dialect: MySQL)
- 
+-- Technique: UPDATE (dialect: Mysql)
 UPDATE athletes
-SET position = 'Goalkeeper'
-WHERE id = 201;
+SET
+  position = 'Thủ môn'
+WHERE
+  id = 201;

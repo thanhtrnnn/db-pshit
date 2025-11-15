@@ -1,0 +1,1 @@
+DELETE FROM CommunityHealthWorkers WHERE MentalHealthParity = FALSE;

@@ -1,416 +1,453 @@
-# SQL Recipes and Solution Approaches for problems/ folder
+# SQL Recipes & Taxonomy Guide (Hướng dẫn Phân loại & Công thức SQL)
 
-This guide gives practical solution patterns (with ready-to-use SQL templates) that cover the vast majority of tasks in `problems/`. Use the pattern that matches each problem’s verb and data shape (count/list/top-N/update/delete/insert/compare, etc.). All examples are standard SQL; MySQL-specific notes are added when useful.
+Hướng dẫn toàn diện về 10 danh mục phân loại SQL trong dự án này, kèm theo ví dụ và mô tả chi tiết.
 
-Tip: Adjust table/column names to your schema and replace literals. For MySQL date math, use DATEDIFF/DATE_ADD; for Postgres, use INTERVALs.
+---
 
-## 1) Counting and grouping
+## 1. Modification (Chỉnh sửa / DML & DDL)
 
-- Count per group
+**Mô tả (Vietnamese):**
+Các phép toán thay đổi dữ liệu hoặc cấu trúc bảng. Bao gồm INSERT, UPDATE, DELETE, MERGE, CREATE TABLE, ALTER TABLE, DROP TABLE, và các câu lệnh DDL/DML khác.
+
+**Thư mục:** `solutions/01_modification/`
+
+**Ví dụ:**
 ```sql
-SELECT region, COUNT(*) AS cnt
-FROM facilities
-GROUP BY region
-ORDER BY region;
+-- INSERT new records
+INSERT INTO users (id, name, email) 
+VALUES (1, 'John Doe', 'john@example.com');
+
+-- UPDATE existing records
+UPDATE products SET price = price * 1.1 WHERE category = 'electronics';
+
+-- DELETE records
+DELETE FROM logs WHERE created_at < DATEADD(MONTH, -1, GETDATE());
+
+-- MERGE (upsert pattern)
+MERGE INTO target AS t
+USING source AS s
+ON t.id = s.id
+WHEN MATCHED THEN UPDATE SET t.value = s.value
+WHEN NOT MATCHED THEN INSERT (id, value) VALUES (s.id, s.value);
 ```
 
-- Count with condition per group
+**Từ khóa nhận dạng:** INSERT, UPDATE, DELETE, MERGE, CREATE, ALTER, DROP, TRUNCATE
+
+---
+
+## 2. Aggregation (Tập hợp / Kỳ tích)
+
+**Mô tả (Vietnamese):**
+Các truy vấn sử dụng hàm tập hợp (aggregate functions) để tóm tắt dữ liệu, thường kết hợp với GROUP BY. Áp dụng các phép toán như COUNT, SUM, AVG, MIN, MAX trên nhóm dữ liệu.
+
+**Thư mục:** `solutions/02_aggregation/`
+
+**Ví dụ:**
 ```sql
-SELECT country,
-       SUM(CASE WHEN type = 'hospital' THEN 1 ELSE 0 END) AS hospitals,
-       SUM(CASE WHEN type = 'clinic'   THEN 1 ELSE 0 END) AS clinics
-FROM health_facilities
-GROUP BY country;
-```
+-- Simple aggregation
+SELECT COUNT(*) AS total_orders, SUM(amount) AS total_sales
+FROM orders;
 
-- Count distinct
-```sql
-SELECT teacher_id, COUNT(DISTINCT subject) AS unique_subjects
-FROM teacher_subjects
-GROUP BY teacher_id;
-```
+-- GROUP BY aggregation
+SELECT 
+    department,
+    COUNT(*) AS employee_count,
+    AVG(salary) AS avg_salary,
+    MAX(salary) AS max_salary
+FROM employees
+GROUP BY department
+HAVING COUNT(*) > 5;
 
-## 2) Filtering by attributes and date/time
-
-- Basic filters
-```sql
-SELECT name, rating
-FROM movies
-WHERE country = 'Brazil' AND rating >= 8;
-```
-
-- Date window (last N days)
-```sql
--- MySQL
-SELECT *
-FROM events
-WHERE event_date >= CURDATE() - INTERVAL 7 DAY;
-```
-
-- Day-to-day comparison (rising temperature)
-```sql
--- MySQL: DATEDIFF(d2, d1) = 1
-SELECT w1.id
-FROM weather w1
-JOIN weather w2
-  ON DATEDIFF(w1.recordDate, w2.recordDate) = 1
- AND w1.city = w2.city
-WHERE w1.temperature > w2.temperature;
-```
-
-## 3) Joins: inner, left anti-join, semi-join
-
-- Inner join
-```sql
-SELECT o.id, c.name, o.amount
-FROM orders o
-JOIN customers c ON c.id = o.customer_id;
-```
-
-- Left anti-join ("in A but not in B")
-```sql
-SELECT a.*
-FROM table_a a
-LEFT JOIN table_b b ON b.a_id = a.id
-WHERE b.a_id IS NULL;
-```
-
-- Intersection ("in both A and B")
-```sql
-SELECT user_id
-FROM (
-  SELECT user_id, 'A' AS grp FROM actions WHERE category = 'A'
-  UNION ALL
-  SELECT user_id, 'B' FROM actions WHERE category = 'B'
-) t
-GROUP BY user_id
-HAVING COUNT(DISTINCT grp) = 2;
-```
-
-## 4) Top-N per group (window functions)
-
-```sql
-SELECT *
-FROM (
-  SELECT country, project, budget,
-         ROW_NUMBER() OVER (PARTITION BY country ORDER BY budget DESC) AS rn
-  FROM projects
-) t
-WHERE rn <= 3
-ORDER BY country, rn;
-```
-
-## 5) Aggregations with conditional pivots
-
-```sql
-SELECT category,
-       SUM(CASE WHEN season = 'Spring' THEN amount ELSE 0 END) AS spring_amt,
-       SUM(CASE WHEN season = 'Summer' THEN amount ELSE 0 END) AS summer_amt,
-       SUM(CASE WHEN season = 'Fall'   THEN amount ELSE 0 END) AS fall_amt,
-       SUM(CASE WHEN season = 'Winter' THEN amount ELSE 0 END) AS winter_amt
+-- COUNT DISTINCT
+SELECT category, COUNT(DISTINCT product_id) AS unique_products
 FROM sales
 GROUP BY category;
 ```
 
-## 6) Division queries ("bought all products")
-
-```sql
-SELECT c.customer_id
-FROM customers c
-JOIN purchases p ON p.customer_id = c.customer_id
-GROUP BY c.customer_id
-HAVING COUNT(DISTINCT p.product_id) = (
-  SELECT COUNT(DISTINCT product_id) FROM products
-);
-```
-
-## 7) Range joins (effective dates)
-
-```sql
-SELECT p.product_id,
-       ROUND(SUM(p2.price * u.quantity) / NULLIF(SUM(u.quantity), 0), 2) AS avg_price
-FROM UnitsSold u
-JOIN Prices p2
-  ON p2.product_id = u.product_id
- AND u.purchase_date BETWEEN p2.start_date AND p2.end_date
-JOIN Products p ON p.product_id = u.product_id
-GROUP BY p.product_id;
-```
-
-## 8) Set differences and symmetric logic
-
-- "either A or B but not both"
-```sql
-SELECT user_id
-FROM (
-  SELECT user_id, SUM(CASE WHEN cond_a THEN 1 ELSE 0 END) AS a,
-                 SUM(CASE WHEN cond_b THEN 1 ELSE 0 END) AS b
-  FROM events
-  GROUP BY user_id
-) t
-WHERE (a > 0 OR b > 0) AND NOT (a > 0 AND b > 0);
-```
-
-## 9) Window-based sequences (consecutive rows)
-
-```sql
-SELECT DISTINCT num
-FROM (
-  SELECT num,
-         LAG(num, 1) OVER (ORDER BY id) AS n1,
-         LAG(num, 2) OVER (ORDER BY id) AS n2
-  FROM logs
-) t
-WHERE num = n1 AND num = n2;
-```
-
-## 10) DML: INSERT / UPDATE / DELETE
-
-- Insert
-```sql
-INSERT INTO volunteers (id, name, hours_served)
-VALUES (5, 'Liam Brown', 30.00);
-```
-
-- Update with arithmetic
-```sql
-UPDATE employees
-SET salary = ROUND(salary * 1.10, 2)
-WHERE status = 'active';
-```
-
-- Delete by condition
-```sql
-DELETE FROM shipments
-WHERE origin_warehouse = 'Rio de Janeiro'
-  AND destination_country = 'Brazil'
-  AND ship_date < '2022-02-01';
-```
-
-- Update via join
-```sql
--- MySQL syntax
-UPDATE contracts c
-JOIN owners o ON o.owner_id = c.owner_id
-SET c.address = o.address
-WHERE c.address IS NULL;
-```
-
-## 11) String cleaning and normalization
-
-```sql
-SELECT id,
-       CONCAT(UPPER(LEFT(name,1)), LOWER(SUBSTRING(name,2))) AS fixed_name
-FROM people;
-```
-
-## 12) Frequently asked patterns mapped to your file names
-
-Below are pattern pairings you can apply directly to matching problem names in `problems/`.
-
-- "Tổng số / Số lượng / Có bao nhiêu ..." → Counting and grouping (Sections 1, 2, 3)
-- "Liệt kê / Hiển thị / Kể tên ..." → Filtering + joins; optional ORDER BY; distinct if needed
-- "So sánh ..." → Grouped sums for regions, then compare or use window rank
-- "Top N ..." → Window functions (Section 4)
-- "Xác định ... đã ở cả A và B" → Intersection (Section 3)
-- "... nhưng không ..." → Left anti-join (Section 3)
-- "Cập nhật ..." → DML UPDATE (Section 10)
-- "Xóa ..." → DML DELETE (Section 10)
-- "Chèn ..." → DML INSERT (Section 10)
-- "Trung bình / Tỷ lệ / Tỷ lệ phần trăm" → Aggregation + CASE; AVG of indicator
-- "Trong quý / năm / tháng ..." → Date filtering (Section 2)
-- "theo quốc gia / khu vực" → GROUP BY country/region; sometimes need a join to a geography table
-
-## 13) Concrete solutions for common classics (adjust table names)
-
-- Big Countries (SQL95)
-```sql
-SELECT name, population, area
-FROM World
-WHERE area >= 3000000 OR population >= 25000000;
-```
-
-- Delete Duplicate Emails (SQL98)
-```sql
-DELETE p1
-FROM Person p1
-JOIN Person p2
-  ON p1.Email = p2.Email AND p1.Id > p2.Id;
-```
-
-- Consecutive Numbers (SQL94)
-```sql
-SELECT DISTINCT num AS ConsecutiveNums
-FROM (
-  SELECT id, num,
-         LAG(num, 1) OVER (ORDER BY id) AS n1,
-         LAG(num, 2) OVER (ORDER BY id) AS n2
-  FROM Logs
-) t
-WHERE num = n1 AND num = n2;
-```
-
-- Replace Employee ID with Unique Identifier (SQL96)
-```sql
-SELECT u.unique_id, e.name
-FROM Employees e
-LEFT JOIN EmployeeUNI u ON u.id = e.id;
-```
-
-- Average Time of Process per Machine (SQL97)
-```sql
-WITH pairs AS (
-  SELECT machine_id, process_id,
-         MAX(CASE WHEN activity_type = 'start' THEN timestamp END) AS start_ts,
-         MAX(CASE WHEN activity_type = 'end'   THEN timestamp END) AS end_ts
-  FROM Activity
-  GROUP BY machine_id, process_id
-)
-SELECT machine_id, ROUND(AVG(TIMESTAMPDIFF(SECOND, start_ts, end_ts)), 3) AS processing_time
-FROM pairs
-GROUP BY machine_id;
-```
-
-- Recyclable and Low Fat Products (SQL100)
-```sql
-SELECT product_id
-FROM Products
-WHERE low_fats = 'Y' AND recyclable = 'Y';
-```
-
-- Not Boring Movies (SQL101)
-```sql
-SELECT *
-FROM Cinema
-WHERE id % 2 = 1 AND description <> 'boring'
-ORDER BY rating DESC;
-```
-
-- Rising Temperature (SQL102)
-```sql
-SELECT w1.id
-FROM Weather w1
-JOIN Weather w2 ON DATEDIFF(w1.recordDate, w2.recordDate) = 1
-               AND w1.city = w2.city
-WHERE w1.temperature > w2.temperature;
-```
-
-- Confirmation Rate (SQL126)
-```sql
-SELECT s.user_id,
-       ROUND(AVG(CASE WHEN c.action = 'confirmed' THEN 1.0 ELSE 0 END), 2) AS confirmation_rate
-FROM Signups s
-LEFT JOIN Confirmations c ON c.user_id = s.user_id
-GROUP BY s.user_id;
-```
-
-- Invalid Tweets (SQL129)
-```sql
-SELECT tweet_id
-FROM Tweets
-WHERE LENGTH(content) > 15;
-```
-
-- Average Selling Price (SQL133)
-```sql
-SELECT p.product_id,
-       ROUND(SUM(pr.price * u.units) / NULLIF(SUM(u.units), 0), 2) AS average_price
-FROM Prices pr
-JOIN UnitsSold u
-  ON pr.product_id = u.product_id
- AND u.purchase_date BETWEEN pr.start_date AND pr.end_date
-JOIN Products p ON p.product_id = u.product_id
-GROUP BY p.product_id;
-```
-
-- Movie Rating (SQL134) – samples
-```sql
--- 1) user with highest avg rating (ties by lexicographically smallest name)
-SELECT name AS results
-FROM (
-  SELECT u.name, AVG(mr.rating) AS avg_rating,
-         RANK() OVER (ORDER BY AVG(mr.rating) DESC, u.name ASC) r
-  FROM MovieRating mr
-  JOIN Users u ON u.user_id = mr.user_id
-  GROUP BY u.user_id, u.name
-) t WHERE r = 1
-UNION ALL
--- 2) highest rated movie in Feb 2020 (ties by lexicographically smallest title)
-SELECT title AS results
-FROM (
-  SELECT m.title,
-         RANK() OVER (ORDER BY AVG(mr.rating) DESC, m.title ASC) r
-  FROM MovieRating mr
-  JOIN Movies m ON m.movie_id = mr.movie_id
-  WHERE mr.created_at >= '2020-02-01' AND mr.created_at < '2020-03-01'
-  GROUP BY m.movie_id, m.title
-) t WHERE r = 1;
-```
-
-- Students and Examinations (SQL136)
-```sql
-SELECT s.student_id, s.student_name, sub.subject_name,
-       COUNT(e.subject_name) AS attended_exams
-FROM Students s
-CROSS JOIN Subjects sub
-LEFT JOIN Examinations e
-  ON e.student_id = s.student_id AND e.subject_name = sub.subject_name
-GROUP BY s.student_id, s.student_name, sub.subject_name
-ORDER BY s.student_id, sub.subject_name;
-```
-
-- Managers with at least 5 direct reports (SQL137)
-```sql
-SELECT m.name
-FROM Employee e
-JOIN Employee m ON m.id = e.managerId
-GROUP BY m.id, m.name
-HAVING COUNT(*) >= 5;
-```
-
-- Fix Names in a Table (SQL138)
-```sql
-SELECT user_id,
-       CONCAT(UPPER(LEFT(name,1)), LOWER(SUBSTRING(name,2))) AS name
-FROM Users
-ORDER BY user_id;
-```
-
-- Employee Bonus (SQL139)
-```sql
-SELECT e.name, b.bonus
-FROM Employee e
-LEFT JOIN Bonus b ON b.empId = e.empId
-WHERE b.bonus IS NULL OR b.bonus < 1000;
-```
-
-- Customer Who Bought All Products (SQL131)
-```sql
-SELECT customer_id
-FROM Customer
-GROUP BY customer_id
-HAVING COUNT(DISTINCT product_key) = (
-  SELECT COUNT(*) FROM Product
-);
-```
-
-- Product Sales Analysis I (SQL130) – example
-```sql
-SELECT product_id, SUM(sales) AS total_sales
-FROM Sales
-GROUP BY product_id;
-```
-
-## 14) Practical checklist when solving any problem
-
-- Draw the minimal schema you need (tables, keys, relevant columns)
-- Decide join type(s): inner for matches, left for "including those without", anti-join for "without"
-- Mark filters: WHERE vs ON, and time ranges
-- Choose aggregation level: what you GROUP BY
-- Compute measures with SUM/COUNT/AVG and CASE for conditional
-- For per-group top-N, use ROW_NUMBER / RANK
-- For sequences, use LAG/LEAD
-- For DML tasks, ensure WHERE targets only intended rows; use transactions if needed
+**Từ khóa nhận dạng:** COUNT, SUM, AVG, MIN, MAX, GROUP BY, HAVING
 
 ---
-If you want, I can now generate tailored queries for a selected subset (or all) problems by parsing each HTML in `problems/` to infer table names and produce ready-to-run SQL files next to each problem.
+
+## 3. Grouping + Having (Nhóm & Điều kiện HAVING)
+
+**Mô tả (Vietnamese):**
+Các truy vấn nhấn mạnh `GROUP BY` kết hợp `HAVING` để lọc sau khi tổng hợp, hoặc yêu cầu xác định Top-N trong từng nhóm (ví dụ: NV có doanh số cao nhất mỗi phòng ban). Nhiều bài toán dùng `ROW_NUMBER`/`RANK` để hỗ trợ chọn các bản ghi tốt nhất trong nhóm nhưng kết quả cuối cùng vẫn dựa trên tiêu chí nhóm.
+
+**Thư mục:** `solutions/03_grouping_having/`
+
+**Ví dụ:**
+```sql
+-- HAVING với điều kiện đếm
+SELECT department_id, COUNT(*) AS employee_count
+FROM employees
+GROUP BY department_id
+HAVING COUNT(*) >= 5;
+
+-- HAVING với SUM
+SELECT customer_id, SUM(amount) AS total_spent
+FROM orders
+GROUP BY customer_id
+HAVING SUM(amount) > 1000;
+
+-- Top 3 nhân viên doanh số cao nhất mỗi phòng (dùng window để lọc)
+WITH ranked AS (
+    SELECT 
+        department_id,
+        employee_id,
+        SUM(amount) AS total_sales,
+        ROW_NUMBER() OVER (PARTITION BY department_id ORDER BY SUM(amount) DESC) AS rn
+    FROM sales
+    GROUP BY department_id, employee_id
+)
+SELECT *
+FROM ranked
+WHERE rn <= 3;
+```
+
+**Từ khóa nhận dạng:** HAVING, GROUP BY ... HAVING, Top-N per group, ROW_NUMBER, RANK, DENSE_RANK
+
+---
+
+## 4. Pivoting (Xoay bảng / Chuyển đổi cột)
+
+**Mô tả (Vietnamese):**
+Các truy vấn biến các hàng thành cột (chuyển đổi dữ liệu từ dạng dài sang dạng rộng). Sử dụng PIVOT, hoặc các biểu thức CASE kết hợp với hàm tập hợp để tạo ra bảng dạng ma trận.
+
+**Thư mục:** `solutions/04_pivoting/`
+
+**Ví dụ:**
+```sql
+-- PIVOT syntax (SQL Server)
+SELECT *
+FROM (
+    SELECT month, sales_amount
+    FROM monthly_sales
+)
+PIVOT (
+    SUM(sales_amount)
+    FOR month IN ([January], [February], [March])
+) AS pvt;
+
+-- CASE-based pivoting (portable across databases)
+SELECT 
+    product_id,
+    SUM(CASE WHEN quarter = 'Q1' THEN revenue ELSE 0 END) AS Q1_revenue,
+    SUM(CASE WHEN quarter = 'Q2' THEN revenue ELSE 0 END) AS Q2_revenue,
+    SUM(CASE WHEN quarter = 'Q3' THEN revenue ELSE 0 END) AS Q3_revenue,
+    SUM(CASE WHEN quarter = 'Q4' THEN revenue ELSE 0 END) AS Q4_revenue
+FROM sales
+GROUP BY product_id;
+
+-- Conditional aggregation
+SELECT 
+    store_id,
+    COUNT(CASE WHEN status = 'completed' THEN 1 END) AS completed_orders,
+    COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending_orders
+FROM orders
+GROUP BY store_id;
+```
+
+**Từ khóa nhận dạng:** PIVOT, FOR...IN, CASE...WHEN...THEN (trong SELECT với GROUP BY)
+
+---
+
+## 5. Set Operations (Phép Toán Tập Hợp)
+
+**Mô tả (Vietnamese):**
+Các truy vấn kết hợp kết quả từ nhiều SELECT bằng cách sử dụng UNION (tất cả hoặc distinct), INTERSECT (giao tập), hoặc EXCEPT (hiệu tập).
+
+**Thư mục:** `solutions/05_set_operations/`
+
+**Ví dụ:**
+```sql
+-- UNION (loại bỏ duplicates)
+SELECT user_id, 'premium' AS type FROM premium_users
+UNION
+SELECT user_id, 'free' AS type FROM free_users;
+
+-- UNION ALL (giữ duplicates)
+SELECT order_id FROM orders_2022
+UNION ALL
+SELECT order_id FROM orders_2023;
+
+-- INTERSECT (các user vừa là premium vừa là active)
+SELECT user_id FROM premium_users
+INTERSECT
+SELECT user_id FROM active_users;
+
+-- EXCEPT (các user premium nhưng không active)
+SELECT user_id FROM premium_users
+EXCEPT
+SELECT user_id FROM active_users;
+```
+
+**Từ khóa nhận dạng:** UNION, UNION ALL, INTERSECT, EXCEPT
+
+---
+
+## 6. Relational Division (Phép Chia Quan Hệ)
+
+**Mô tả (Vietnamese):**
+Các truy vấn tìm kiếm hàng mà có **tất cả** những đặc điểm hoặc kết nối cụ thể. Thường sử dụng NOT EXISTS với ALL, COUNT(DISTINCT), hoặc GROUP BY...HAVING COUNT(*) để xác định bộ hoàn chỉnh.
+
+**Thư mục:** `solutions/06_relational_division/`
+
+**Ví dụ:**
+```sql
+-- Tìm khách hàng đã mua TẤT CẢ các sản phẩm
+SELECT c.customer_id, c.customer_name
+FROM customers c
+WHERE NOT EXISTS (
+    SELECT 1 FROM products p
+    WHERE NOT EXISTS (
+        SELECT 1 FROM orders o
+        WHERE o.customer_id = c.customer_id
+        AND o.product_id = p.product_id
+    )
+);
+
+-- Sử dụng GROUP BY...HAVING
+SELECT customer_id
+FROM orders
+GROUP BY customer_id
+HAVING COUNT(DISTINCT product_id) = (SELECT COUNT(*) FROM products);
+
+-- Tìm nhân viên tham gia TẤT CẢ các dự án
+SELECT e.employee_id
+FROM employees e
+WHERE (SELECT COUNT(DISTINCT project_id) FROM assignments WHERE employee_id = e.employee_id)
+    = (SELECT COUNT(*) FROM projects);
+```
+
+**Từ khóa nhận dạng:** NOT EXISTS, ALL, EVERY, GROUP BY...HAVING COUNT(DISTINCT...)
+
+---
+
+## 7. Complex Join (Kết Nối Phức Tạp)
+
+**Mô tả (Vietnamese):**
+Các truy vấn sử dụng các kết nối nâng cao như range join (kết nối dựa trên khoảng), kết nối với điều kiện phức tạp hơn so với bằng nhau (>=, <=, BETWEEN), hoặc nhiều kết nối lồng nhau với điều kiện non-equijoin.
+
+**Thư mục:** `solutions/07_complex_join/`
+
+**Ví dụ:**
+```sql
+-- Range join (kết nối trong khoảng)
+SELECT o.order_id, o.amount, ps.price_from, ps.price_to
+FROM orders o
+JOIN price_slabs ps
+    ON o.amount >= ps.price_from
+    AND o.amount <= ps.price_to;
+
+-- Self-join to find overlapping ranges
+SELECT a.id, b.id
+FROM appointments a
+JOIN appointments b
+    ON a.room_id = b.room_id
+    AND a.start_time < b.end_time
+    AND b.start_time < a.end_time
+WHERE a.id < b.id;
+
+-- Multiple complex conditions
+SELECT e.employee_id, d.department_id, p.project_id
+FROM employees e
+JOIN departments d ON e.dept_id = d.id
+JOIN projects p ON p.budget >= e.salary * 12 AND p.dept_id = d.id
+WHERE e.hire_date <= p.start_date;
+```
+
+**Từ khóa nhận dạng:** JOIN...ON (với >=, <=, <, >, BETWEEN), SELF JOIN, multiple joins với điều kiện non-equi
+
+---
+
+## 8. Filtering (Lọc / Xử Lý Ngày & Chuỗi)
+
+**Mô tả (Vietnamese):**
+Các truy vấn sử dụng các hàm xử lý ngày tháng (DATE, DATEADD, DATEDIFF, EXTRACT, MONTH, YEAR) hoặc hàm xử lý chuỗi (UPPER, LOWER, TRIM, SUBSTRING, REPLACE, LIKE, REGEX) để lọc và biến đổi dữ liệu.
+
+**Thư mục:** `solutions/08_filtering/`
+
+**Ví dụ:**
+```sql
+-- Date filtering
+SELECT *
+FROM orders
+WHERE order_date >= DATEADD(MONTH, -3, GETDATE())
+AND order_date < GETDATE();
+
+-- DATEDIFF
+SELECT 
+    employee_id,
+    hire_date,
+    DATEDIFF(YEAR, hire_date, GETDATE()) AS years_employed
+FROM employees;
+
+-- String functions
+SELECT *
+FROM customers
+WHERE UPPER(city) = 'HANOI'
+AND LOWER(status) = 'active'
+AND LEN(phone_number) = 10;
+
+-- SUBSTRING and LIKE
+SELECT *
+FROM users
+WHERE SUBSTRING(email, 1, CHARINDEX('@', email) - 1) LIKE '%john%'
+OR email LIKE '%.edu';
+
+-- REPLACE
+SELECT 
+    name,
+    REPLACE(phone_number, '-', '') AS normalized_phone
+FROM contacts;
+
+-- Regular expression (database-specific)
+SELECT * FROM logs WHERE message REGEXP '^ERROR:.*timeout$';
+```
+
+**Từ khóa nhận dạng:** DATEADD, DATEDIFF, GETDATE, EXTRACT, MONTH, YEAR, DAY, UPPER, LOWER, TRIM, SUBSTRING, REPLACE, LIKE, REGEXP, LEN, CHARINDEX
+
+---
+
+## 9. Retrieval (Lấy Dữ Liệu / Cơ Bản)
+
+**Mô tả (Vietnamese):**
+Các truy vấn SELECT cơ bản để lấy dữ liệu từ một hoặc nhiều bảng với các kết nối đơn giản (INNER JOIN, LEFT JOIN, RIGHT JOIN) và các điều kiện lọc cơ bản.
+
+**Thư mục:** `solutions/09_retrieval/`
+
+**Ví dụ:**
+```sql
+-- Simple SELECT
+SELECT product_id, product_name, price
+FROM products
+WHERE category = 'electronics';
+
+-- INNER JOIN
+SELECT o.order_id, c.customer_name, o.amount
+FROM orders o
+INNER JOIN customers c ON o.customer_id = c.customer_id;
+
+-- LEFT JOIN
+SELECT c.customer_id, c.customer_name, COUNT(o.order_id) AS num_orders
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+WHERE c.country = 'Vietnam'
+GROUP BY c.customer_id, c.customer_name;
+
+-- ORDER BY
+SELECT *
+FROM employees
+WHERE department = 'Sales'
+ORDER BY salary DESC, hire_date ASC;
+
+-- DISTINCT
+SELECT DISTINCT category FROM products;
+```
+
+**Từ khóa nhận dạng:** SELECT...FROM, INNER JOIN, LEFT JOIN, RIGHT JOIN, WHERE, ORDER BY, DISTINCT, GROUP BY (cơ bản)
+
+---
+
+## 10. Complex (Phức Tạp / Kỹ Thuật Kết Hợp)
+
+**Mô tả (Vietnamese):**
+Các truy vấn sử dụng kết hợp **nhiều kỹ thuật** từ các danh mục khác hoặc sử dụng cách tiếp cận nâng cao như WITH (CTE), subqueries lồng nhau, hoặc sự kết hợp của window functions + aggregation + joins phức tạp.
+
+**Thư mục:** `solutions/10_complex/`
+
+**Ví dụ:**
+```sql
+-- CTE with aggregation and window functions
+WITH monthly_sales AS (
+    SELECT 
+        YEAR(order_date) AS year,
+        MONTH(order_date) AS month,
+        SUM(amount) AS total_sales
+    FROM orders
+    GROUP BY YEAR(order_date), MONTH(order_date)
+),
+ranked_sales AS (
+    SELECT 
+        year,
+        month,
+        total_sales,
+        ROW_NUMBER() OVER (PARTITION BY year ORDER BY total_sales DESC) AS rank_in_year
+    FROM monthly_sales
+)
+SELECT * FROM ranked_sales WHERE rank_in_year <= 3;
+
+-- Multiple JOINs with filtering and aggregation
+SELECT 
+    d.department_name,
+    COUNT(e.employee_id) AS emp_count,
+    AVG(e.salary) AS avg_salary,
+    MAX(p.project_count) AS max_projects_per_emp
+FROM departments d
+LEFT JOIN employees e ON d.id = e.dept_id
+LEFT JOIN (
+    SELECT employee_id, COUNT(*) AS project_count
+    FROM project_assignments
+    GROUP BY employee_id
+) p ON e.employee_id = p.employee_id
+WHERE d.active = 1
+GROUP BY d.department_name
+HAVING COUNT(e.employee_id) > 0;
+
+-- Nested subqueries with CASE and UNION
+SELECT 
+    'high_value' AS customer_segment,
+    customer_id
+FROM customers
+WHERE total_purchases > (SELECT AVG(total_purchases) * 2 FROM customers)
+UNION
+SELECT 
+    'low_frequency',
+    customer_id
+FROM customers
+WHERE last_order_date < DATEADD(MONTH, -6, GETDATE());
+```
+
+**Từ khóa nhận dạng:** WITH...AS (CTE), multiple subqueries, kết hợp WINDOW + AGGREGATION + JOIN, UNION, CASE...WHEN (phức tạp)
+
+---
+
+## Quick Reference Table
+
+| Danh mục | Folder | Từ khóa chính | Đặc điểm |
+|----------|--------|--------------|---------|
+| **Modification** | `01_modification/` | INSERT, UPDATE, DELETE, MERGE | Thay đổi dữ liệu |
+| **Aggregation** | `02_aggregation/` | COUNT, SUM, AVG, GROUP BY, HAVING | Tóm tắt / Kỳ tích |
+| **Grouping + Having** | `03_grouping_having/` | GROUP BY ... HAVING, Top-N per group, ROW_NUMBER | Lọc sau tổng hợp |
+| **Pivoting** | `04_pivoting/` | PIVOT, CASE...THEN...SUM | Xoay cột |
+| **Set Operations** | `05_set_operations/` | UNION, INTERSECT, EXCEPT | Kết hợp tập hợp |
+| **Relational Division** | `06_relational_division/` | NOT EXISTS, ALL, HAVING COUNT(DISTINCT) | Tất cả các đặc điểm |
+| **Complex Join** | `07_complex_join/` | JOIN...ON (>=, <=, BETWEEN), SELF JOIN | Kết nối nâng cao |
+| **Filtering** | `08_filtering/` | DATE, SUBSTRING, UPPER, LIKE, REGEXP | Xử lý ngày/chuỗi |
+| **Retrieval** | `09_retrieval/` | SELECT, INNER/LEFT JOIN, WHERE, ORDER BY | Cơ bản / Lấy dữ liệu |
+| **Complex** | `10_complex/` | WITH, CTE, multiple techniques | Kỹ thuật kết hợp |
+
+---
+
+## Quy Trình Phân Loại (Classification Decision Tree)
+
+Khi nhận dữ liệu từ một bài toán, tuân theo quy trình này:
+
+1. **Có INSERT/UPDATE/DELETE/MERGE/DDL?** → **Modification**
+2. **Không.** Có GROUP BY + HAVING hoặc yêu cầu Top-N per group (ROW_NUMBER/RANK)?** → **Grouping + Having**
+3. **Không.** Có UNION/INTERSECT/EXCEPT?** → **Set Operations**
+4. **Không.** Có PIVOT hoặc CASE...SUM...GROUP BY (dạng ma trận)?** → **Pivoting**
+5. **Không.** Có NOT EXISTS + ALL hoặc HAVING COUNT(DISTINCT) (tìm tất cả)?** → **Relational Division**
+6. **Không.** Có range join (>=, <=, BETWEEN) hoặc self-join phức tạp?** → **Complex Join**
+7. **Không.** Có hàm ngày (DATEADD, DATEDIFF) hoặc chuỗi (UPPER, SUBSTRING, REGEX)?** → **Filtering**
+8. **Không.** Có GROUP BY + COUNT/SUM/AVG mà không có OVER()?** → **Aggregation**
+9. **Không.** Có WITH (CTE) hoặc kết hợp nhiều kỹ thuật?** → **Complex**
+10. **Mặc định:** Basic SELECT + JOIN → **Retrieval**
+
+---
+
+## Ghi chú
+
+- Các ví dụ sử dụng SQL Server dialect; có thể cần điều chỉnh nhẹ cho MySQL, PostgreSQL, v.v.
+- Một truy vấn có thể kết hợp nhiều kỹ thuật; hãy chọn danh mục dựa trên **kỹ thuật chủ yếu**.
+- Tham khảo `evaluation.md` để biết chi tiết hơn về các quy tắc phân loại.

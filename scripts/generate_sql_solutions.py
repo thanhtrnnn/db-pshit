@@ -12,7 +12,7 @@ except Exception:
 SECTIONS = {
     '01_modification': ['cập nhật', 'xóa', 'chèn', 'insert', 'delete', 'update', 'thêm', 'create table', 'alter', 'drop', 'merge'],
     '02_aggregation': ['tổng số', 'bao nhiêu', 'count', 'average', 'trung bình', 'sum', 'ratio', 'mỗi', 'per', 'theo', 'group', 'by department', 'phân loại', 'category'],
-    '03_window_functions': ['top', 'cao nhất', 'lớn nhất', 'nhỏ nhất', 'rank', 'row_number', 'dense_rank', 'lag', 'lead', 'running'],
+    '03_grouping_having': ['having', 'group by', 'top', 'cao nhất', 'rank', 'row_number', 'dense_rank', 'lag', 'lead', 'nhỏ nhất'],
     '04_pivoting': ['pivot', 'CASE WHEN', 'mùa', 'season', 'matrix', 'cột riêng'],
     '05_set_operations': ['intersect', 'union', 'except', 'both', 'chung', 'loại trừ'],
     '06_relational_division': ['tất cả', 'all', 'cả hai', 'mọi', 'đều', 'all products', 'both categories'],
@@ -37,13 +37,19 @@ FROM <table>
 [WHERE <filter_condition>]
 [GROUP BY <group_cols_optional>];
 """,
-    '04_window_functions': """-- Window function template
-SELECT * FROM (
-  SELECT <partition_col>, <measure>,
-         ROW_NUMBER() OVER (PARTITION BY <partition_col> ORDER BY <measure> DESC) rn
-  FROM <table>
-) ranked
-WHERE rn <= <N>;
+        '03_grouping_having': """-- Grouping + HAVING / Top-N per group template
+SELECT <group_col>
+FROM <table>
+GROUP BY <group_col>
+HAVING COUNT(*) >= <threshold>;
+
+-- Optional: emulate top-N per group with window functions
+WITH ranked AS (
+    SELECT <partition_col>, <measure>,
+                 ROW_NUMBER() OVER (PARTITION BY <partition_col> ORDER BY <measure> DESC) rn
+    FROM <table>
+)
+SELECT * FROM ranked WHERE rn <= <N>;
 """,
     '05_pivoting': """-- Conditional aggregation (pivot) template
 SELECT <group_col>,
@@ -150,8 +156,8 @@ def classify(filename_lower: str, content_lower: str):
     # Strong signals
     if any(w in content_lower for w in ['insert', 'update', 'delete', 'chèn', 'cập nhật', 'xóa', 'create table', 'alter table']):
         return '01_modification'
-    if any(w in content_lower for w in ['row_number', 'rank', 'dense_rank', 'top 3', 'top 5', 'lag', 'lead']):
-        return '04_window_functions'
+    if any(w in content_lower for w in ['row_number', 'rank', 'dense_rank', 'top 3', 'top 5', 'lag', 'lead', 'having']):
+        return '03_grouping_having'
     if any(w in content_lower for w in ['between', 'effective date', 'hiệu lực', 'start_date', 'end_date']):
         return '08_complex_join'
     if any(w in content_lower for w in ['tất cả', 'bought all', 'all products', 'mọi sản phẩm']):
@@ -166,7 +172,7 @@ def classify(filename_lower: str, content_lower: str):
         return '02_aggregation'
     # Fallbacks based on filename cues
     if 'top' in filename_lower or 'cao nhất' in filename_lower:
-        return '04_window_functions'
+        return '03_grouping_having'
     if 'trung bình' in filename_lower or 'average' in filename_lower:
         return '02_aggregation'
     return '10_retrieval'
@@ -212,7 +218,7 @@ def _ensure_unique_path(path: Path) -> Path:
 RATIONALES = {
     '01_modification': 'Tác vụ DML/DDL (INSERT/UPDATE/DELETE/CREATE). Cần chỉ rõ điều kiện để tránh ảnh hưởng ngoài ý muốn.',
     '02_aggregation': 'Tổng hợp dữ liệu (COUNT/SUM/AVG) với hoặc không có GROUP BY.',
-    '04_window_functions': 'Sử dụng hàm cửa sổ (ROW_NUMBER, RANK, LAG...) để xếp hạng hoặc soi liền kề.',
+    '03_grouping_having': 'Nhấn mạnh GROUP BY + HAVING hoặc top-N per group (có thể dùng hàm cửa sổ để lọc).',
     '05_pivoting': 'Biến hàng thành cột bằng tổng hợp có điều kiện hoặc PIVOT.',
     '06_set_operations': 'Dùng UNION/INTERSECT/EXCEPT để so sánh hoặc giao/hiệu giữa các tập kết quả.',
     '07_relational_division': 'Bài toán “đã có tất cả” với NOT EXISTS kép hoặc HAVING COUNT bằng tổng yêu cầu.',

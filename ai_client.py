@@ -53,7 +53,7 @@ _TAXONOMY_MODEL_NAME = os.getenv("GOOGLE_TAXONOMY_MODEL", _SQL_MODEL_NAME)
 _TAXONOMY_OPTIONS = (
     "modification",
     "aggregation",
-    "window_functions",
+    "grouping_having",
     "pivoting",
     "set_operations",
     "relational_division",
@@ -92,7 +92,7 @@ IMPORTANT RULES MUST FOLLOW:
 """
 
 _TAXONOMY_SYSTEM_PROMPT = """You are a classification assistant for SQL practice problems. Review ONLY the provided SQL solution (plus optional reasoning) and infer which taxonomy bucket best represents the core technique.
-Allowed taxonomy labels (exact spelling): modification, aggregation, window_functions, pivoting, set_operations, relational_division, complex_join, filtering, retrieval, complex.
+Allowed taxonomy labels (exact spelling): modification, aggregation, grouping_having, pivoting, set_operations, relational_division, complex_join, filtering, retrieval, complex.
 The taxonomy evaluation guideline is attached with the prompt, refer strictly to it when making your decision.
 Output single-line JSON: {"taxonomy_section": "<label>", "reasoning": "<concise justification>"}. The label MUST be one of the allowed values; never invent new categories.
 """

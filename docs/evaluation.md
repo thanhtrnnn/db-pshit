@@ -12,31 +12,29 @@ To classify a problem, follow this logic. **Do not stop at the first match.**
 
 2.  **Scan for Structural Complexity (forces `complex`):**
     * These traits immediately force the problem into the `complex` bucket, even if no other advanced technique appears:
-        * **CTE usage:** any `WITH ... AS (...)` block counts. 2+ CTE exist -> `complex`.
+        * **CTE usage:** any `WITH ... AS (...)` block counts.  ANY CTE exist -> `complex`.
         * **Heavy subquerying:** ANY SUBQUERIES IN THE QUERY (SELECT inside FROM/ GROUP BY/ HAVING...) -> `complex`
         * **Complex joins:** multi-table joins whose conditions mix inequalities, OR chains, or cross-table calculations (not just simple FK equality).
-        * **Very long solutions:** statements that naturally span dozens of lines/steps before the final `SELECT`.
+        * **Very long solutions:** statements that naturally span dozens of lines/steps, involving >= 4 techniques.
     * If any bullet above is true -> `complex`. (Stop here).
 
 3.  **Identify Advanced Techniques:**
     * If still undecided, look for any following specific patterns to route to their dedicated categories:
-        * `window_functions` (Any `OVER()` clause)
+        * `grouping_having` (`GROUP BY`/ `HAVING` exists, Top-N per group, ROW_NUMBER/RANK used to pick best in group)
         * `pivoting` (Any `SUM(CASE...)` or `PIVOT`)
         * `set_operations` (Any `UNION`, `UNION ALL`, `INTERSECT`, `EXCEPT`)
-        * `relational_division` ("For all" logic)
-        * `complex_join` (any `JOIN`/ `LEFT JOIN`/ `RIGHT JOIN`/ `CROSS JOIN` among >= 2 tables together)
-
-4.  **Single Advanced Technique:**
+        * `relational_division` ("For all" logic, `HAVING COUNT()` exists)
+        * `complex_join` (any `JOIN`/ `LEFT JOIN`/ `RIGHT JOIN`/ `CROSS JOIN` >= 2 tables together)
     * If *exactly one* advanced technique from Step 2 was identified:
-    * **YES** -> Assign that category (e.g., `window_functions`, `pivoting`, etc.). (Stop).
+    * **YES** -> Assign that category (e.g., `grouping_having`, `pivoting`, etc.). (Stop).
 
-5.  **Check Simple Categories (If no advanced techniques found):**
+4.  **Check Simple Categories (If no advanced techniques found):**
     * *If not aggregation*, is the *main challenge* the `WHERE` clause (ANY date/string processing logic)?
     * **YES** -> `filtering`. (Stop).
     * *If none of the above*, does the query's main purpose involve `GROUP BY` or aggregates like `COUNT()`, `SUM()`?
     * **YES** -> `aggregation`. (Stop).
 
-6.  **Assign Default:**
+5.  **Assign Default:**
     * *If none of the above apply*, the query is a standard lookup.
     * **YES** -> `retrieval`.
 
@@ -52,9 +50,9 @@ To classify a problem, follow this logic. **Do not stop at the first match.**
 * **`aggregation`** (Merged Aggregation)
     * **Description:** Summarizes data. Includes both single (`COUNT(*)`) and grouped (`GROUP BY`) aggregations.
 
-### 3. Advanced Analytics & Reshaping
-* **`window_functions`** (Window Functions)
-    * **Description:** Ranking (`ROW_NUMBER`) or inter-row calculations (`LAG`, `LEAD`, `SUM() OVER`).
+### 3. Grouping & Reshaping
+* **`grouping_having`** (Grouping + Having)
+    * **Description:** Core logic relies on `GROUP BY` with `HAVING` filters or Top-N per group requirements. May use `ROW_NUMBER` / `RANK` inside CTEs to pick best rows per group, but the outcome is still driven by group filtering.
 * **`pivoting`** (Pivoting)
     * **Description:** Transforms rows into columns (`SUM(CASE WHEN...)` or `PIVOT`).
 

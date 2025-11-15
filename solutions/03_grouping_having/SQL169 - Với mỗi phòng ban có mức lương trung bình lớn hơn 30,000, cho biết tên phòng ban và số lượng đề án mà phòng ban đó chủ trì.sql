@@ -1,0 +1,16 @@
+--- Tables: DEAN, PHONGBAN, NHANVIEN
+--- Technique: JOIN, GROUP BY, HAVING (dialect: Sql Server)
+
+SELECT 
+    p.TENPHG, 
+    COUNT(d.MADA) AS SoLuongDeAn
+FROM 
+    PHONGBAN AS p
+JOIN 
+    NHANVIEN AS n ON p.MAPHG = n.PHG
+LEFT JOIN 
+    DEAN AS d ON p.MAPHG = d.PHONG
+GROUP BY 
+    p.MAPHG, p.TENPHG
+HAVING 
+    AVG(n.LUONG) > 30000;

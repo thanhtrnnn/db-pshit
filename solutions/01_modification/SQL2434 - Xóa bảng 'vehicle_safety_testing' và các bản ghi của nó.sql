@@ -1,0 +1,1 @@
+DROP TABLE vehicle_safety_testing;

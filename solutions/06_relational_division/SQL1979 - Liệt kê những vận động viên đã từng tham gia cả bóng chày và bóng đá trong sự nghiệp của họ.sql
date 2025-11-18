@@ -4,5 +4,5 @@
 SELECT athlete_name
 FROM athletes
 WHERE sport IN ('Baseball', 'Football')
-GROUP BY athlete_id, athlete_name
+GROUP BY athlete_name
 HAVING COUNT(DISTINCT sport) = 2;

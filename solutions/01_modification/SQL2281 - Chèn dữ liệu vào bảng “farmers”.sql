@@ -1,0 +1,1 @@
+INSERT INTO farmers (id, name, age, gender, location) VALUES (1, 'John Doe', 45, 'Male', 'Rural Texas');

@@ -1,0 +1,1 @@
+SELECT country, COUNT(*) FROM green_buildings GROUP BY country ORDER BY country;

@@ -1,0 +1,1 @@
+DELETE FROM Artists WHERE NOT EXISTS (SELECT 1 FROM Artworks WHERE Artworks.artist = Artists.id);

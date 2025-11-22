@@ -5,4 +5,5 @@ SELECT DISTINCT
 FROM
     products AS p
 JOIN
-    product_labor_certifications AS plc ON p.product_id = plc.product_id;
+    product_labor_certifications AS plc 
+ON p.product_id = plc.product_id;

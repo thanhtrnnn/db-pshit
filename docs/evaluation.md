@@ -7,7 +7,7 @@ This document defines the 10 categories for classifying SQL problems. The decisi
 To classify a problem, follow this logic. **Do not stop at the first match.**
 
 1.  **Check for Modification:**
-    * Does the problem require `INSERT`, `UPDATE`, `DELETE`, `CREATE`, `ALTER`, or `DROP`?
+    * Does the solution contain any `INSERT`, `UPDATE`, `DELETE`, `CREATE`, `ALTER`, or `DROP`?
     * **YES** -> `modification`. (This is a unique path. Stop here).
 
 2.  **Scan for Structural Complexity (forces `complex`):**
@@ -20,18 +20,18 @@ To classify a problem, follow this logic. **Do not stop at the first match.**
 
 3.  **Identify Advanced Techniques:**
     * If still undecided, look for any following specific patterns to route to their dedicated categories:
-        * `grouping_having` (`GROUP BY`/ `HAVING` exists, Top-N per group, ROW_NUMBER/RANK used to pick best in group)
+        * `grouping_having` (Any `GROUP BY`/ `HAVING` exists, Top-N per group, ROW_NUMBER/RANK used to pick best in group)
         * `pivoting` (Any `SUM(CASE...)` or `PIVOT`)
-        * `set_operations` (Any `UNION`, `UNION ALL`, `INTERSECT`, `EXCEPT`)
+        * `set_operations` (Any `UNION`, `UNION ALL`, `INTERSECT`, `EXCEPT` exists)
         * `relational_division` ("For all" logic, `HAVING COUNT()` exists)
-        * `complex_join` (any `JOIN`/ `LEFT JOIN`/ `RIGHT JOIN`/ `CROSS JOIN` >= 2 tables together)
+        * `complex_join` (any `JOIN`/ `LEFT JOIN`/ `RIGHT JOIN`/ `CROSS JOIN` >= 2 tables together exists)
     * If *exactly one* advanced technique from Step 2 was identified:
-    * **YES** -> Assign that category (e.g., `grouping_having`, `pivoting`, etc.). (Stop).
+    * **YES** -> Assign the corresponding category (e.g., `grouping_having`, `pivoting`, etc.). (Stop).
 
 4.  **Check Simple Categories (If no advanced techniques found):**
-    * *If not aggregation*, is the *main challenge* the `WHERE` clause (ANY date/string processing logic)?
+    * *If not aggregation*, is the *main challenge* the `WHERE` clause (ANY date/string processing logic/ subquery for condition)?
     * **YES** -> `filtering`. (Stop).
-    * *If none of the above*, does the query's main purpose involve `GROUP BY` or aggregates like `COUNT()`, `SUM()`?
+    * *If none of the above*, does the query includes aggregates like `COUNT()`, `SUM()`?
     * **YES** -> `aggregation`. (Stop).
 
 5.  **Assign Default:**

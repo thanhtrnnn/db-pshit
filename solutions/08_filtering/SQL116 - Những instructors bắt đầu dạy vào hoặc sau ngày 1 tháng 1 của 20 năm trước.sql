@@ -1,5 +1,3 @@
-SELECT * FROM Instructor
-WHERE
-	started_on >= DATE_SUB(CURDATE(), INTERVAL 20 YEAR)
-	AND DAY(started_on) = 1
-	AND MONTH(started_on) = 1;
+select username,fname,lname,started_on 
+from Instructor 
+where Str_to_date(started_on,'%Y+20-%m-%d') <= current_time;

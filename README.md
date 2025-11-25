@@ -239,11 +239,7 @@ All generated SQL follows these conventions:
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for workflow guidelines on:
-- Running the generator locally
-- Reviewing generated solutions
-- Adding or modifying problems
-- Improving taxonomy classification
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on reviewing generated solutions. Thank you for helping improve accuracy and quality!
 
 ## Environment Variables
 

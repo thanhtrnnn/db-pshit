@@ -454,3 +454,12 @@ SQL2787 - Có bao nhiêu nhà tài trợ lặp lại trong năm 2022.html | comp
 SQL2788 - Tổng số nhân viên làm việc tại bộ phận 'Sản xuất' ở tất cả các nhà máy là bao nhiêu.html | aggregation | 02_aggregation/SQL2788 - Tổng số nhân viên làm việc tại bộ phận 'Sản xuất' ở tất cả các nhà máy là bao nhiêu.sql
 SQL2790 - Tổng trọng lượng hàng hóa được công ty Orion Lines xử lý tại Cảng Hồng Kông là bao nhiêu.html | aggregation | 02_aggregation/SQL2790 - Tổng trọng lượng hàng hóa được công ty Orion Lines xử lý tại Cảng Hồng Kông là bao nhiêu.sql
 SQL2791 - Tổng doanh thu từ các khách sạn thân thiện với môi trường và các chuyến thăm bảo tàng tại Đức là bao nhiêu.html | set_operations | 05_set_operations/SQL2791 - Tổng doanh thu từ các khách sạn thân thiện với môi trường và các chuyến thăm bảo tàng tại Đức là bao nhiêu.sql
+SQL-2883 - Tính tổng vốn đầu tư của các dự án có sector chứa từ “Energy” và kèm tổng điểm ESG.html | complex | 10_complex/SQL-2883 - Tính tổng vốn đầu tư của các dự án có sector chứa từ “Energy” và kèm tổng điểm ESG.sql
+ENG-001 - Basic employee information.html | retrieval | 09_retrieval/ENG-001 - Basic employee information.sql
+ENG-003 - Customer with specific informations.html | retrieval | 09_retrieval/ENG-003 - Customer with specific informations.sql
+ENG-005 - BASIC JOIN 2.html | retrieval | 09_retrieval/ENG-005 - BASIC JOIN 2.sql
+ENG-006 - BASIC AGGREGATE 1.html | aggregation | 02_aggregation/ENG-006 - BASIC AGGREGATE 1.sql
+ENG-007 - BASIC AGGREGATE 2.html | grouping_having | 03_grouping_having/ENG-007 - BASIC AGGREGATE 2.sql
+ENG-008 - BASIC CREATE 1.html | modification | 01_modification/ENG-008 - BASIC CREATE 1.sql
+ENG-009 - BASIC CREATE 2.html | modification | 01_modification/ENG-009 - BASIC CREATE 2.sql
+ENG-010 - BASIC ALTER 1.html | modification | 01_modification/ENG-010 - BASIC ALTER 1.sql

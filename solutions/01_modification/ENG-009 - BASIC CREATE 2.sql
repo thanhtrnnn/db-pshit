@@ -1,0 +1,8 @@
+CREATE TABLE SaleOrder (
+    OrderID INT NOT NULL PRIMARY KEY,
+    CustID INT NOT NULL,
+    OrderDate DATE NOT NULL,
+    Status ENUM('NEW', 'PAID', 'CANCELLED') NOT NULL,
+    TotalAmount DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (CustID) REFERENCES Customer(CustID)
+);

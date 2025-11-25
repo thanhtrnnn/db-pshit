@@ -1,4 +1,5 @@
 -- Solution using NOT EXISTS
+-- NOT AC
 SELECT customer_id FROM Customer c
 WHERE NOT EXISTS (
 	SELECT 1 FROM Product p
@@ -9,6 +10,7 @@ WHERE NOT EXISTS (
 );
 
 -- Solution using GROUP BY and HAVING
+-- AC
 SELECT customer_id
 FROM Customer
 GROUP BY customer_id

@@ -1,12 +1,9 @@
 -- Tables: Volunteers
 -- Technique: Group By, Filtering (dialect: Mysql)
 
-SELECT
-    program_category AS `Loại chương trình`,
-    COUNT(DISTINCT volunteer_id) AS `Tổng số tình nguyện viên`
-FROM
-    Volunteers
-WHERE
-    volunteer_date BETWEEN '2022-01-01' AND '2022-03-31'
-GROUP BY
-    program_category;
+select
+    program_category
+    , count(distinct volunteer_id) as total_volunteers
+from Volunteers
+where volunteer_date between '2022-01-01' and '2022-04-01'
+group by program_category;

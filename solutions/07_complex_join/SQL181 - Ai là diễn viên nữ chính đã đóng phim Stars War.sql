@@ -10,4 +10,4 @@ JOIN
 JOIN
     MovieStar AS MS ON SI.starName = MS.name
 WHERE
-    M.title = 'Stars War' AND MS.gender = 'F';
+    M.title = 'Star Wars' AND MS.gender = 'F';

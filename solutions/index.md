@@ -23,7 +23,7 @@ SQL137 - Managers with at least 5 direction report.html | relational_division | 
 SQL138 - Fix name in a table.html | modification | 01_modification/SQL138 - Fix name in a table.sql
 SQL139 - Empoyee bonus.html | retrieval | 09_retrieval/SQL139 - Empoyee bonus.sql
 SQL1994 - Tỷ lệ phần trăm người dùng đã đăng một tweet trong tháng qua và sống ở một quốc gia có dân số trên 100 triệu người, trong tổng số tất cả người dùng ở một quốc gia có dân số trên 100 triệu người là bao nhiêu.txt | complex | 10_complex/SQL1994 - Tỷ lệ phần trăm người dùng đã đăng một tweet trong tháng qua và sống ở một quốc gia có dân số trên 100 triệu người, trong tổng số tất cả người dùng ở một quốc gia có dân số trên 100 triệu người là bao nhiêu.sql
-SQL94 - Consecutive number.html | retrieval | 09_retrieval/SQL94 - Consecutive number.sql
+SQL94 - Consecutive number.html | complex_join | 07_complex_join/SQL94 - Consecutive number.sql
 SQL95 - Big Countries.html | retrieval | 09_retrieval/SQL95 - Big Countries.sql
 SQL96 -  Replace Employee ID with unique identify.html | retrieval | 09_retrieval/SQL96 - Replace Employee ID with unique identify.sql
 SQL97 - Average time of process per machine.html | pivoting | 04_pivoting/SQL97 - Average time of process per machine.sql
@@ -232,7 +232,7 @@ SQL2114 - Cập nhật cột game_mode trong bảng game_sessions thành 'Domina
 SQL2116 - Mức lương trung bình của nhân viên trong mỗi bộ phận, được nhóm theo chức danh công việc của họ là bao nhiêu.html | grouping_having | 03_grouping_having/SQL2116 - Mức lương trung bình của nhân viên trong mỗi bộ phận, được nhóm theo chức danh công việc của họ là bao nhiêu.sql
 SQL2118 - Hiển thị tên của tất cả các điểm đến đã được tiếp thị vào năm 2020 và có hơn 15000 khách du lịch ghé thăm trong năm đó..html | retrieval | 09_retrieval/SQL2118 - Hiển thị tên của tất cả các điểm đến đã được tiếp thị vào năm 2020 và có hơn 15000 khách du lịch ghé thăm trong năm đó..sql
 SQL2121 - Tổng cộng có bao nhiêu tình nguyện viên đã đóng góp hơn 100 giờ.html | aggregation | 02_aggregation/SQL2121 - Tổng cộng có bao nhiêu tình nguyện viên đã đóng góp hơn 100 giờ.sql
-SQL2123 - Tên của những chiếc máy bay quân sự có chi phí cao nhất trong bảng AIRCRAFT_INFO là gì.html | filtering | 08_filtering/SQL2123 - Tên của những chiếc máy bay quân sự có chi phí cao nhất trong bảng AIRCRAFT_INFO là gì.sql
+SQL2123 - Tên của những chiếc máy bay quân sự có chi phí cao nhất trong bảng AIRCRAFT_INFO là gì.html | retrieval | 09_retrieval/SQL2123 - Tên của những chiếc máy bay quân sự có chi phí cao nhất trong bảng AIRCRAFT_INFO là gì.sql
 SQL2127 - Tổng số trận đấu của mỗi đội cricket là bao nhiêu.html | set_operations | 05_set_operations/SQL2127 - Tổng số trận đấu của mỗi đội cricket là bao nhiêu.sql
 SQL2128 - Chèn hồ sơ mới cho một tàu chở hàng có tên 'Atlantic Explorer' với số ID là 4, thuộc sở hữu của công ty Global Shipping và sức chứa 180.000..html | modification | 01_modification/SQL2128 - Chèn hồ sơ mới cho một tàu chở hàng có tên 'Atlantic Explorer' với số ID là 4, thuộc sở hữu của công ty Global Shipping và sức chứa 180.000..sql
 SQL2130 - Có bao nhiêu trường học và bệnh viện công ở mỗi bang của Hoa Kỳ tính đến năm 2022.html | filtering | 08_filtering/SQL2130 - Có bao nhiêu trường học và bệnh viện công ở mỗi bang của Hoa Kỳ tính đến năm 2022.sql
@@ -463,3 +463,44 @@ ENG-007 - BASIC AGGREGATE 2.html | grouping_having | 03_grouping_having/ENG-007 
 ENG-008 - BASIC CREATE 1.html | modification | 01_modification/ENG-008 - BASIC CREATE 1.sql
 ENG-009 - BASIC CREATE 2.html | modification | 01_modification/ENG-009 - BASIC CREATE 2.sql
 ENG-010 - BASIC ALTER 1.html | modification | 01_modification/ENG-010 - BASIC ALTER 1.sql
+DEMO-001 - Liệt kê sản phẩm.html | retrieval | 09_retrieval/DEMO-001 - Liệt kê sản phẩm.sql
+DEMO-002 - Danh sách đơn hàng và tên khách hàng.html | retrieval | 09_retrieval/DEMO-002 - Danh sách đơn hàng và tên khách hàng.sql
+DEMO-003 - Tính tổng doanh thu theo khách hàng.html | aggregation | 02_aggregation/DEMO-003 - Tính tổng doanh thu theo khách hàng.sql
+DEMO-004 - Tổng số tiền đã thanh toán thành công của mỗi khách.html | complex | 10_complex/DEMO-004 - Tổng số tiền đã thanh toán thành công của mỗi khách.sql
+DEMO-005 - Tìm khách hàng chưa từng có đơn hàng.html | complex_join | 07_complex_join/DEMO-005 - Tìm khách hàng chưa từng có đơn hàng.sql
+DEMO-006 - Tăng lương cho nhân viên có tổng doanh số hoàn tất vượt ngưỡng.html | modification | 01_modification/DEMO-006 - Tăng lương cho nhân viên có tổng doanh số hoàn tất vượt ngưỡng.sql
+DEMO-007 - Đánh dấu đơn hàng đã thanh toán.html | modification | 01_modification/DEMO-007 - Đánh dấu đơn hàng đã thanh toán.sql
+DEMO-008 - Tăng lương cho nhân viên phòng IT.html | modification | 01_modification/DEMO-008 - Tăng lương cho nhân viên phòng IT.sql
+DEMO-009 - Xóa khách hàng không có bất kỳ đơn hàng nào.html | modification | 01_modification/DEMO-009 - Xóa khách hàng không có bất kỳ đơn hàng nào.sql
+DEMO-010 - Xóa bản ghi chi tiết đơn hàng cho sản phẩm đã ngừng kinh doanh hoặc thuộc nhóm Obsolete.html | modification | 01_modification/DEMO-010 - Xóa bản ghi chi tiết đơn hàng cho sản phẩm đã ngừng kinh doanh hoặc thuộc nhóm Obsolete.sql
+DEMO-011 - Tạo bảng hệ thống quản lý đăng ký học phần.html | modification | 01_modification/DEMO-011 - Tạo bảng hệ thống quản lý đăng ký học phần.sql
+DEMO-012 - Tạo bảng quản lý đơn hàng.html | modification | 01_modification/DEMO-012 - Tạo bảng quản lý đơn hàng.sql
+DEMO-013 - Tạo bảng hệ thống quản lý linh kiện.html | modification | 01_modification/DEMO-013 - Tạo bảng hệ thống quản lý linh kiện.sql
+DEMO-014 - Tạo bảng hệ thống quản lý giao dịch tài khoản.html | modification | 01_modification/DEMO-014 - Tạo bảng hệ thống quản lý giao dịch tài khoản.sql
+DEMO-015 - Chỉnh sửa thông tin sinh viên.html | modification | 01_modification/DEMO-015 - Chỉnh sửa thông tin sinh viên.sql
+DEMO-016 - Chính sửa thông tin đơn hàng.html | modification | 01_modification/DEMO-016 - Chính sửa thông tin đơn hàng.sql
+DEMO-017 - Chính sửa thông tin sản phẩm.html | modification | 01_modification/DEMO-017 - Chính sửa thông tin sản phẩm.sql
+DEMO-018 - Chỉnh sửa thông tin nhân viên.html | modification | 01_modification/DEMO-018 - Chỉnh sửa thông tin nhân viên.sql
+DEMO-019 - Tạo bảng hệ thống quản lý thư viện.html | modification | 01_modification/DEMO-019 - Tạo bảng hệ thống quản lý thư viện.sql
+DEMO-020 - Tạo bảng hệ thống quản lý bán hàng.html | modification | 01_modification/DEMO-020 - Tạo bảng hệ thống quản lý bán hàng.sql
+DEMO-021 - Thêm cựu sinh viên vào bảng ALUMNI.html | modification | 01_modification/DEMO-021 - Thêm cựu sinh viên vào bảng ALUMNI.sql
+DEMO-022 - Chỉnh sửa thông tin bảng điểm khách hàng.html | modification | 01_modification/DEMO-022 - Chỉnh sửa thông tin bảng điểm khách hàng.sql
+DEMO-023 - Chỉnh sửa thông tin tồn kho.html | modification | 01_modification/DEMO-023 - Chỉnh sửa thông tin tồn kho.sql
+DEMO-024 - Chỉnh sửa thông tin giao hàng.html | modification | 01_modification/DEMO-024 - Chỉnh sửa thông tin giao hàng.sql
+DEMO-025 - Tạo bảng đánh giá đơn hàng.html | modification | 01_modification/DEMO-025 - Tạo bảng đánh giá đơn hàng.sql
+DEMO-026 - Đếm số dòng hàng của từng đơn.html | grouping_having | 03_grouping_having/DEMO-026 - Đếm số dòng hàng của từng đơn.sql
+DEMO-027 - Cập nhật trạng thái thanh toán theo tổng tiền đơn hàng.html | modification | 01_modification/DEMO-027 - Cập nhật trạng thái thanh toán theo tổng tiền đơn hàng.sql
+DEMO-028 - Supplier cung cấp nhiều sản phẩm Electronics.html | grouping_having | 03_grouping_having/DEMO-028 - Supplier cung cấp nhiều sản phẩm Electronics.sql
+DEMO-029 - Khách hàng có tổng chi tiêu lớn và có đơn giá trị cao trong năm 2024.html | grouping_having | 03_grouping_having/DEMO-029 - Khách hàng có tổng chi tiêu lớn và có đơn giá trị cao trong năm 2024.sql
+DEMO-030 - Khách hàng chi tiêu lớn nhưng không có đơn bị hủy.html | grouping_having | 03_grouping_having/DEMO-030 - Khách hàng chi tiêu lớn nhưng không có đơn bị hủy.sql
+DEMO-031 - Thêm danh sách khách hàng VIP theo tổng chi tiêu năm 2024.html | modification | 01_modification/DEMO-031 - Thêm danh sách khách hàng VIP theo tổng chi tiêu năm 2024.sql
+DEMO-032 - Cập nhật Tier cho khách chi tiêu cao nhất trong từng thành phố.html | modification | 01_modification/DEMO-032 - Cập nhật Tier cho khách chi tiêu cao nhất trong từng thành phố.sql
+DEMO-033 - Xóa khách hàng lưu trữ có lịch sử mua hàng quá ít.html | modification | 10_complex/DEMO-033 - Xóa khách hàng lưu trữ có lịch sử mua hàng quá ít.sql
+DEMO-034 - Xóa log điểm thưởng welcome trùng lặp cho khách chi tiêu thấp.html | complex | 10_complex/DEMO-034 - Xóa log điểm thưởng welcome trùng lặp cho khách chi tiêu thấp.sql
+DEMO-035 - Tổng doanh thu theo thành phố từ 2 kênh bán hàng.html | set_operations | 05_set_operations/DEMO-035 - Tổng doanh thu theo thành phố từ 2 kênh bán hàng.sql
+DEMO-036 - Khách hàng chi tiêu cao trong cả năm 2023 và 2024.html | grouping_having | 03_grouping_having/DEMO-036 - Khách hàng chi tiêu cao trong cả năm 2023 và 2024.sql
+DEMO-037 - Liệt kê đơn hàng kèm tên khách hàng.html | retrieval | 09_retrieval/DEMO-037 - Liệt kê đơn hàng kèm tên khách hàng.sql
+DEMO-038 - Liệt kê đơn hàng theo thành phố.html | filtering | 08_filtering/DEMO-038 - Liệt kê đơn hàng theo thành phố.sql
+DEMO-039 - Tạo bảng quản lý nhân sự.html | modification | 01_modification/DEMO-039 - Tạo bảng quản lý nhân sự.sql
+DEMO-040 - Tạo bảng hệ thống ghi log.html | modification | 01_modification/DEMO-040 - Tạo bảng hệ thống ghi log.sql
+DEMO-041 - Tạo bảng quản lý đặt phòng khách sạn.html | modification | 01_modification/DEMO-041 - Tạo bảng quản lý đặt phòng khách sạn.sql

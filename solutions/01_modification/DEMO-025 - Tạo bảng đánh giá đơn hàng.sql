@@ -1,0 +1,13 @@
+--- Tables: CUSTOMER, PRODUCT
+--- Technique: DDL (dialect: Sql Server)
+CREATE TABLE REVIEW (
+    ReviewID INT PRIMARY KEY,
+    CustID INT NOT NULL,
+    ProductID INT NOT NULL,
+    Rating INT NOT NULL CHECK (Rating BETWEEN 1 AND 5),
+    Comment VARCHAR(500) NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT (SYSDATETIME()),
+    FOREIGN KEY (CustID) REFERENCES CUSTOMER(CustID),
+    FOREIGN KEY (ProductID) REFERENCES PRODUCT(ProductID),
+    CONSTRAINT UQ_CustomerProductReview UNIQUE (CustID, ProductID)
+);

@@ -1,0 +1,16 @@
+-- Tables: GUEST, ROOM
+-- Technique: CREATE TABLE (Mysql)
+
+CREATE TABLE RESERVATION (
+    ReservationID INT PRIMARY KEY AUTO_INCREMENT,
+    GuestID INT NOT NULL,
+    RoomID INT NOT NULL,
+    CheckIn DATE NOT NULL,
+    CheckOut DATE NOT NULL,
+    BookingDate DATE NOT NULL,
+    NumGuests INT NOT NULL,
+    Status VARCHAR(20) NOT NULL,
+    Notes VARCHAR(255),
+    FOREIGN KEY (GuestID) REFERENCES GUEST(GuestID),
+    FOREIGN KEY (RoomID) REFERENCES ROOM(RoomID)
+);

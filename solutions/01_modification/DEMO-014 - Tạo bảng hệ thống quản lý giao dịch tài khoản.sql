@@ -1,0 +1,11 @@
+-- Tables: ACCOUNT, TXN
+-- Technique: DDL (dialect: Mysql)
+
+CREATE TABLE TXN (
+    TxnID INT PRIMARY KEY,
+    AccountID INT NOT NULL,
+    Amount DECIMAL(12,2) NOT NULL CHECK (Amount > 0),
+    Type ENUM('DEPOSIT', 'WITHDRAW') NOT NULL,
+    TxnTime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (AccountID) REFERENCES ACCOUNT(AccountID)
+);

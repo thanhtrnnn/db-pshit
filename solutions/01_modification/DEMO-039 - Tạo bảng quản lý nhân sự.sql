@@ -1,0 +1,13 @@
+-- Tables: EMPLOYEE
+-- Technique: CREATE TABLE (dialect: mysql)
+
+CREATE TABLE EMPLOYEE (
+    EmpID INT PRIMARY KEY,
+    FullName VARCHAR(100) NOT NULL,
+    BirthDate DATE NULL,
+    HireDate DATE NOT NULL,
+    Salary DECIMAL(10, 2) NOT NULL,
+    Department VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) NULL,
+    Phone VARCHAR(20) NULL
+);

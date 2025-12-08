@@ -1,7 +1,7 @@
 """Batch generation script for SQL solutions using Google AI Studio.
 
 Workflow:
-1. Iterate over HTML stubs in problems/ matching pattern 'SQL*.html'.
+1. Iterate over HTML stubs in problems/ matching predefined pattern.
 2. Read file content; extract problem_id from filename prefix.
 3. Provide a taxonomy hint guess (simple heuristics) based on keywords.
 4. Call `generate_sql_solution` (Gemini) to obtain {sql, reasoning, taxonomy_section}.
@@ -32,6 +32,7 @@ PROBLEMS_DIR = ROOT / "problems"
 SOLUTIONS_DIR = ROOT / "solutions"
 INDEX_FILE = SOLUTIONS_DIR / "index.md"
 IGNORE_FILE = ROOT / "ignore.txt"
+PATTERN = r"DEMO-?\d+"
 
 SECTION_MAP = {
     "modification": "01_modification",
@@ -56,8 +57,8 @@ def load_ignored_problems() -> set[str]:
             for line in f:
                 line = line.strip()
                 if line:
-                    # Extract problem ID like SQL94
-                    m = re.match(r"(SQL-?\d+)", line)
+                    # Extract problem ID like a variable pattern
+                    m = re.match(r"(%s)" % PATTERN, line)
                     if m:
                         ignored.add(m.group(1))
     return ignored
@@ -164,7 +165,7 @@ def normalize_taxonomy(raw: str, fallback_hint: str) -> str:
     return "retrieval"
 
 def parse_problem_id(filename: str) -> str:
-    m = re.match(r"(SQL-?\d+)", filename, re.IGNORECASE)
+    m = re.match(r"(%s)" % PATTERN, filename, re.IGNORECASE)
     return m.group(1) if m else "UNKNOWN"
 
 def ensure_index_header():
@@ -230,7 +231,7 @@ def _mock_generate_sql_solution(problem_html: str, problem_id: str, taxonomy_hin
 def main(limit: int, force: bool, dry_run: bool, replace_index: bool):
     ensure_index_header()
     ignored_problems = load_ignored_problems()
-    html_files = sorted(p for p in PROBLEMS_DIR.glob("ENG*.html"))
+    html_files = sorted(p for p in PROBLEMS_DIR.glob("DEMO*.html"))
     processed = 0
     for html_path in html_files:
         if limit and processed >= limit:
@@ -253,7 +254,7 @@ def main(limit: int, force: bool, dry_run: bool, replace_index: bool):
             # Lazy import to avoid requiring GOOGLE_SQL_API_KEY during dry runs
             from ai_client import generate_sql_solution  # type: ignore
             data = generate_sql_solution(html_content, problem_id, taxonomy_hint)
-            time.sleep(6)  # Cooldown to withstand rate limits
+            time.sleep(10)  # Cooldown to withstand rate limits
         taxonomy_section_raw = data.get("taxonomy_section", taxonomy_hint)
         taxonomy_section = normalize_taxonomy(taxonomy_section_raw, taxonomy_hint)
         if taxonomy_section not in SECTION_MAP:

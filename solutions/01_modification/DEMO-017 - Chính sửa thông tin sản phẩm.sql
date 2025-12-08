@@ -1,0 +1,18 @@
+CREATE TABLE Products (
+    id VARCHAR(50),
+    name VARCHAR(255),
+    category VARCHAR(100),
+    price INT,
+    status VARCHAR(20),
+    created_at VARCHAR(50),
+    temp_note VARCHAR(255)
+);
+
+ALTER TABLE Products
+    DROP COLUMN temp_note,
+    MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    MODIFY COLUMN price DECIMAL(10,2) NOT NULL,
+    ADD CONSTRAINT chk_price_non_negative CHECK (price >= 0),
+    MODIFY COLUMN status ENUM('ACTIVE', 'INACTIVE', 'DISCONTINUED') NOT NULL DEFAULT 'ACTIVE',
+    MODIFY COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    MODIFY COLUMN category VARCHAR(100) NOT NULL;

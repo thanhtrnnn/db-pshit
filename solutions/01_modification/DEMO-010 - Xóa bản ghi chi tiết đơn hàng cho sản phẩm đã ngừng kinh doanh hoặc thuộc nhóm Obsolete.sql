@@ -1,0 +1,1 @@
+DELETE oi FROM ORDER_ITEM oi JOIN PRODUCT p ON oi.ProductID = p.ProductID LEFT JOIN CATEGORY c ON p.CategoryID = c.CategoryID WHERE p.Discontinued = 1 OR c.CategoryName = 'Obsolete';

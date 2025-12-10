@@ -1,4 +1,3 @@
-SET SQL_SAFE_UPDATES = 0;
 UPDATE Payment
 SET
   Status = 'PAID',
@@ -15,4 +14,3 @@ WHERE
     HAVING
       SUM(oi.Qty * p.Price) >= 500
   );
-SET SQL_SAFE_UPDATES = 1;

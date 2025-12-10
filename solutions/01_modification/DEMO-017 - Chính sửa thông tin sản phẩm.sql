@@ -1,13 +1,3 @@
-CREATE TABLE Products (
-    id VARCHAR(50),
-    name VARCHAR(255),
-    category VARCHAR(100),
-    price INT,
-    status VARCHAR(20),
-    created_at VARCHAR(50),
-    temp_note VARCHAR(255)
-);
-
 ALTER TABLE Products
     DROP COLUMN temp_note,
     MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

@@ -5,7 +5,7 @@ SELECT
   c.CustomerName
 FROM CUSTOMER AS c
 LEFT JOIN
-  `ORDER` AS o
+  SALEORDER AS o
 ON
   c.CustID = o.CustID
 WHERE

@@ -1,4 +1,8 @@
-CREATE PROCEDURE GetEmployeeById(IN employeeId INT)
+CREATE PROCEDURE GetEmployeeById
+    @employeeId INT
+AS
 BEGIN
-	SELECT * FROM Employees WHERE id = employeeId;
-END
+    SELECT * 
+    FROM Employees
+    WHERE id = @employeeId;
+END;

@@ -1,0 +1,13 @@
+ID: SQL-2887
+Tiêu đề: Tính tốc độ tăng trưởng theo năm của vật liệu
+URL WEB: https://db.ptit.edu.vn/question-detail/877e46e5-254c-4d07-9750-5032efe9846e
+URL API: https://dbapi.ptit.edu.vn/api/app/question/877e46e5-254c-4d07-9750-5032efe9846e
+Loại Database: Mysql
+------------------------------
+
+<h3><strong>Bảng recycling_rates: </strong>Chứa thông tin về <strong>tỷ lệ tái chế của các vật liệu</strong> theo từng năm.</h3><p><strong>Cấu trúc:</strong></p><ul><li>id (INT): Mã định danh duy nhất cho mỗi bản ghi (khóa chính của bảng).</li><li>material (VARCHAR(20)): Loại vật liệu được tái chế (ví dụ: 'glass', 'paper').</li><li>year (INT): Năm thống kê dữ liệu tái chế.</li><li>recycling_rate (DECIMAL(5,2)): Tỷ lệ tái chế, biểu diễn dưới dạng số thập phân (ví dụ: 0.35 tương đương 35%).</li></ul><p><strong>Yêu cầu:</strong></p><p>Tính tốc độ tăng trưởng theo năm của vật liệu ‘glass’ từ 2017 → 2018 theo công thức (rate_2018 - rate_2017) / rate_2017.</p><p><br></p><p><strong>Output ví dụ:</strong></p><pre class="ql-syntax" spellcheck="false">+------------+
+| yoy_growth |
++------------+
+| 0.085714&nbsp; &nbsp;|
++------------+
+</pre>

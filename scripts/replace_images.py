@@ -31,7 +31,7 @@ import datetime
 from typing import Iterable
 
 
-DEFAULT_URL = "https://www.temp-image.com/ib/yTjFTf3wBEvJxI9_1762792154.png"
+DEFAULT_URL = "img/47 56 bo 54.png"
 
 
 def iter_files(root: Path, exts: Iterable[str]) -> Iterable[Path]:

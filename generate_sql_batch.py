@@ -32,7 +32,7 @@ PROBLEMS_DIR = ROOT / "problems"
 SOLUTIONS_DIR = ROOT / "solutions"
 INDEX_FILE = SOLUTIONS_DIR / "index.md"
 IGNORE_FILE = ROOT / "ignore.txt"
-PATTERN = r"DEMO-?\d+"
+PATTERN = r"SQL-?\d+"
 
 SECTION_MAP = {
     "modification": "01_modification",
@@ -231,7 +231,7 @@ def _mock_generate_sql_solution(problem_html: str, problem_id: str, taxonomy_hin
 def main(limit: int, force: bool, dry_run: bool, replace_index: bool):
     ensure_index_header()
     ignored_problems = load_ignored_problems()
-    html_files = sorted(p for p in PROBLEMS_DIR.glob("DEMO*.html"))
+    html_files = sorted(p for p in PROBLEMS_DIR.glob("SQL*.html"))
     processed = 0
     for html_path in html_files:
         if limit and processed >= limit:

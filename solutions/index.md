@@ -44,7 +44,6 @@ SQL114 - Những instructors nào bắt đầu dạy trước 1990.html | filter
 SQL102 - Rising temperature.html | filtering | 08_filtering/SQL102 - Rising temperature.sql
 SQL100 - Recycle and low fat product.html | retrieval | 09_retrieval/SQL100 - Recycle and low fat product.sql
 SQL101 - Not boring movie.html | retrieval | 09_retrieval/SQL101 - Not boring movie.sql
-SQL-2831 - Số lượng bệnh viện và phòng khám nông thôn ở mỗi vùng lãnh thổ là bao nhiêu, và bao nhiêu bệnh viện có sân bay trực thăng.html | complex | 10_complex/SQL-2831 - Số lượng bệnh viện và phòng khám nông thôn ở mỗi vùng lãnh thổ là bao nhiêu, và bao nhiêu bệnh viện có sân bay trực thăng.sql
 SQL-2836 - Những công đoàn nào có hơn 5000 thành viên và có trụ sở tại California.html | filtering | 08_filtering/SQL-2836 - Những công đoàn nào có hơn 5000 thành viên và có trụ sở tại California.sql
 SQL149 - Họ tên, địa chỉ và năm bắt đầu làm việc của các nhân viên trong cty.html | retrieval | 09_retrieval/SQL149 - Họ tên, địa chỉ và năm bắt đầu làm việc của các nhân viên trong cty.sql
 SQL147 - Danh sách các đối tác cung cấp hàng cho công ty.html | retrieval | 09_retrieval/SQL147 - Danh sách các đối tác cung cấp hàng cho công ty.sql
@@ -494,7 +493,7 @@ DEMO-028 - Supplier cung cấp nhiều sản phẩm Electronics.html | grouping_
 DEMO-029 - Khách hàng có tổng chi tiêu lớn và có đơn giá trị cao trong năm 2024.html | grouping_having | 03_grouping_having/DEMO-029 - Khách hàng có tổng chi tiêu lớn và có đơn giá trị cao trong năm 2024.sql
 DEMO-030 - Khách hàng chi tiêu lớn nhưng không có đơn bị hủy.html | grouping_having | 03_grouping_having/DEMO-030 - Khách hàng chi tiêu lớn nhưng không có đơn bị hủy.sql
 DEMO-031 - Thêm danh sách khách hàng VIP theo tổng chi tiêu năm 2024.html | modification | 01_modification/DEMO-031 - Thêm danh sách khách hàng VIP theo tổng chi tiêu năm 2024.sql
-DEMO-032 - Cập nhật Tier cho khách chi tiêu cao nhất trong từng thành phố.html | modification | 01_modification/DEMO-032 - Cập nhật Tier cho khách chi tiêu cao nhất trong từng thành phố.sql
+DEMO-032 - Cập nhật Tier cho khách chi tiêu cao nhất trong từng thành phố.html | modification | 10_complex/DEMO-032 - Cập nhật Tier cho khách chi tiêu cao nhất trong từng thành phố.sql
 DEMO-033 - Xóa khách hàng lưu trữ có lịch sử mua hàng quá ít.html | modification | 10_complex/DEMO-033 - Xóa khách hàng lưu trữ có lịch sử mua hàng quá ít.sql
 DEMO-034 - Xóa log điểm thưởng welcome trùng lặp cho khách chi tiêu thấp.html | complex | 10_complex/DEMO-034 - Xóa log điểm thưởng welcome trùng lặp cho khách chi tiêu thấp.sql
 DEMO-035 - Tổng doanh thu theo thành phố từ 2 kênh bán hàng.html | set_operations | 05_set_operations/DEMO-035 - Tổng doanh thu theo thành phố từ 2 kênh bán hàng.sql
@@ -504,3 +503,87 @@ DEMO-038 - Liệt kê đơn hàng theo thành phố.html | filtering | 08_filter
 DEMO-039 - Tạo bảng quản lý nhân sự.html | modification | 01_modification/DEMO-039 - Tạo bảng quản lý nhân sự.sql
 DEMO-040 - Tạo bảng hệ thống ghi log.html | modification | 01_modification/DEMO-040 - Tạo bảng hệ thống ghi log.sql
 DEMO-041 - Tạo bảng quản lý đặt phòng khách sạn.html | modification | 01_modification/DEMO-041 - Tạo bảng quản lý đặt phòng khách sạn.sql
+SQL-2829 - Ai là nhà nghiên cứu chính cho dự án có số lượng gen tham gia nhiều nhất.html | aggregation | 02_aggregation/SQL-2829 - Ai là nhà nghiên cứu chính cho dự án có số lượng gen tham gia nhiều nhất.sql
+SQL-2831 - Số lượng bệnh viện và phòng khám nông thôn ở mỗi vùng lãnh thổ là bao nhiêu, và bao nhiêu bệnh viện có sân bay trực thăng.html | complex | 10_complex/SQL-2831 - Số lượng bệnh viện và phòng khám nông thôn ở mỗi vùng lãnh thổ là bao nhiêu, và bao nhiêu bệnh viện có sân bay trực thăng.sql
+SQL-2850 - Tìm 3 nhà cung cấp năng lượng nhiều nhất.html | aggregation | 02_aggregation/SQL-2850 - Tìm 3 nhà cung cấp năng lượng nhiều nhất.sql
+SQL-2851 - Xác định tổng sản lượng điện nhà cung cấp.html | filtering | 08_filtering/SQL-2851 - Xác định tổng sản lượng điện nhà cung cấp.sql
+SQL-2852 - Tính tổng sản lượng năng lượng.html | grouping_having | 03_grouping_having/SQL-2852 - Tính tổng sản lượng năng lượng.sql
+SQL-2853 - Tìm nhà cung cấp, sản lượng năng lượng và ngày cung cấp.html | grouping_having | 03_grouping_having/SQL-2853 - Tìm nhà cung cấp, sản lượng năng lượng và ngày cung cấp.sql
+SQL-2856 - Xác định số trung bình nhân viên.html | grouping_having | 03_grouping_having/SQL-2856 - Xác định số trung bình nhân viên.sql
+SQL-2857 - Liệt kê các phòng ban có tỷ lệ nhân viên nữ ≥ 60%.html | grouping_having | 03_grouping_having/SQL-2857 - Liệt kê các phòng ban có tỷ lệ nhân viên nữ ≥ 60%.sql
+SQL-2858 - Tìm các công ty mà mọi phòng ban đều có ít nhất 1 nhân viên nữ. Trả về kèm số phòng ban của công ty..html | grouping_having | 03_grouping_having/SQL-2858 - Tìm các công ty mà mọi phòng ban đều có ít nhất 1 nhân viên nữ. Trả về kèm số phòng ban của công ty..sql
+SQL-2859 - Tìm 3 công ty có trung bình quy mô phòng ban cao nhất.html | complex | 10_complex/SQL-2859 - Tìm 3 công ty có trung bình quy mô phòng ban cao nhất.sql
+SQL-2860 - Tìm 3 đội có trung bình khán giả khi đá sân nhà cao nhất..html | aggregation | 02_aggregation/SQL-2860 - Tìm 3 đội có trung bình khán giả khi đá sân nhà cao nhất..sql
+SQL-2861 - Tính trung bình tổng khán giả mỗi trận và trả về 3 cặp cao nhất..html | pivoting | 04_pivoting/SQL-2861 - Tính trung bình tổng khán giả mỗi trận và trả về 3 cặp cao nhất..sql
+SQL-2862 - Ttính trung bình khán giả khi đội đó đá sân nhà và khi đội đó đá sân khách..html | set_operations | 05_set_operations/SQL-2862 - Ttính trung bình khán giả khi đội đó đá sân nhà và khi đội đó đá sân khách..sql
+SQL-2863 - Tính tổng khán giả theo từng đội.html | set_operations | 05_set_operations/SQL-2863 - Tính tổng khán giả theo từng đội.sql
+SQL-2864 - Liệt kê các bệnh viện ở Nairobi theo khoảng thời gian.html | filtering | 08_filtering/SQL-2864 - Liệt kê các bệnh viện ở Nairobi theo khoảng thời gian.sql
+SQL-2865 - Tính tổng số lượt tiêm trong tháng 03-2022.html | grouping_having | 03_grouping_having/SQL-2865 - Tính tổng số lượt tiêm trong tháng 03-2022.sql
+SQL-2866 - Liệt kê các bệnh viện không có bất kỳ lượt tiêm nào trong khoảng 2022-03-01 đến 2022-03-31, kèm sức chứa..html | complex_join | 07_complex_join/SQL-2866 - Liệt kê các bệnh viện không có bất kỳ lượt tiêm nào trong khoảng 2022-03-01 đến 2022-03-31, kèm sức chứa..sql
+SQL-2867 - Tìm 3 bệnh viện có ngày bận rộn nhất .html | grouping_having | 03_grouping_having/SQL-2867 - Tìm 3 bệnh viện có ngày bận rộn nhất .sql
+SQL-2868 - Liệt kê tổng số sự cố theo ngành và trạng thái công đoàn trong các năm 2021 và 2022..html | grouping_having | 03_grouping_having/SQL-2868 - Liệt kê tổng số sự cố theo ngành và trạng thái công đoàn trong các năm 2021 và 2022..sql
+SQL-2869 - Tính biến động năm theo trạng thái công đoàn tổng sự cố 2022 trừ 2021 cho từng union_status..html | pivoting | 04_pivoting/SQL-2869 - Tính biến động năm theo trạng thái công đoàn tổng sự cố 2022 trừ 2021 cho từng union_status..sql
+SQL-2870 - Tính bình quân sự cố mỗi năm.html | grouping_having | 03_grouping_having/SQL-2870 - Tính bình quân sự cố mỗi năm.sql
+SQL-2871 - Tính tỷ trọng (%) sự cố của nhóm Union trong tổng sự cố của từng ngành (gộp năm 2021 và 2022)..html | grouping_having | 03_grouping_having/SQL-2871 - Tính tỷ trọng (%) sự cố của nhóm Union trong tổng sự cố của từng ngành (gộp năm 2021 và 2022)..sql
+SQL-2872 - Tính tổng số sản phẩm dành cho nam (‘Men’) với Size = 32 trong quý 1 năm 2025 (từ 2025-01-01 đến 2025-03-31)..html | aggregation | 02_aggregation/SQL-2872 - Tính tổng số sản phẩm dành cho nam (‘Men’) với Size = 32 trong quý 1 năm 2025 (từ 2025-01-01 đến 2025-03-31)..sql
+SQL-2873 - Tính tổng số bán theo ProductID cho ‘Women’ (không giới hạn Size).html | grouping_having | 03_grouping_having/SQL-2873 - Tính tổng số bán theo ProductID cho ‘Women’ (không giới hạn Size).sql
+SQL-2874 - Tính trung bình số lượng bán ra.html | aggregation | 02_aggregation/SQL-2874 - Tính trung bình số lượng bán ra.sql
+SQL-2875 - Tính tổng số bán theo Size và trả về Size có tổng cao nhất .html | grouping_having | 03_grouping_having/SQL-2875 - Tính tổng số bán theo Size và trả về Size có tổng cao nhất .sql
+SQL-2876 - Liệt kê các tàu có tổng khối lượng hàng hóa chở ở khu vực ‘Arctic’  10000..html | grouping_having | 03_grouping_having/SQL-2876 - Liệt kê các tàu có tổng khối lượng hàng hóa chở ở khu vực ‘Arctic’  10000..sql
+SQL-2877 - Tính tổng quãng đường đã đi ở khu vực ‘Atlantic’.html | grouping_having | 03_grouping_having/SQL-2877 - Tính tổng quãng đường đã đi ở khu vực ‘Atlantic’.sql
+SQL-2878 - Liệt kê các chuyến đi vi phạm sức chở cargo_weight  max_cargo_weight..html | filtering | 08_filtering/SQL-2878 - Liệt kê các chuyến đi vi phạm sức chở cargo_weight  max_cargo_weight..sql
+SQL-2879 - Tính số khu vực khác nhau đã hoạt động và tổng khối lượng hàng hóa đã chở.html | grouping_having | 03_grouping_having/SQL-2879 - Tính số khu vực khác nhau đã hoạt động và tổng khối lượng hàng hóa đã chở.sql
+SQL-2881 - Liệt kê các dự án thuộc ‘Renewable Energy’ có điểm ESG trung bình ≥ 2.7 và số tiền đầu tư ≥ 5000000..html | grouping_having | 03_grouping_having/SQL-2881 - Liệt kê các dự án thuộc ‘Renewable Energy’ có điểm ESG trung bình ≥ 2.7 và số tiền đầu tư ≥ 5000000..sql
+SQL-2882 - Tính tổng số tiền đầu tư theo location cho các công ty mà mỗi thành phần ESG đều  2.0; chỉ hiển thị những location có tổng ≥ 10000000..html | grouping_having | 03_grouping_having/SQL-2882 - Tính tổng số tiền đầu tư theo location cho các công ty mà mỗi thành phần ESG đều  2.0; chỉ hiển thị những location có tổng ≥ 10000000..sql
+SQL-2884 - Liệt kê các dự án mà mức vốn trên mỗi điểm ESG đạt ≥ 2000000.html | grouping_having | 03_grouping_having/SQL-2884 - Liệt kê các dự án mà mức vốn trên mỗi điểm ESG đạt ≥ 2000000.sql
+SQL-2885 - Tính mức thay đổi tỷ lệ tái chế của vật liệu ‘paper’ giữa năm 2017 và năm 2019 rate_2019 - rate_2017..html | retrieval | 09_retrieval/SQL-2885 - Tính mức thay đổi tỷ lệ tái chế của vật liệu ‘paper’ giữa năm 2017 và năm 2019 rate_2019 - rate_2017..sql
+SQL-2886 - Tm vật liệu có trung bình tỷ lệ tái chế cao nhất..html | retrieval | 09_retrieval/SQL-2886 - Tm vật liệu có trung bình tỷ lệ tái chế cao nhất..sql
+SQL-2887 - Tính tốc độ tăng trưởng theo năm của vật liệu.html | retrieval | 09_retrieval/SQL-2887 - Tính tốc độ tăng trưởng theo năm của vật liệu.sql
+SQL-2888 - Liệt kê các vật liệu có tỷ lệ tái chế tăng đều qua từng năm.html | complex_join | 07_complex_join/SQL-2888 - Liệt kê các vật liệu có tỷ lệ tái chế tăng đều qua từng năm.sql
+SQL-2889 - Liệt kê tổng số lượng bán theo mỗi sản phẩm thuần chay .html | aggregation | 02_aggregation/SQL-2889 - Liệt kê tổng số lượng bán theo mỗi sản phẩm thuần chay .sql
+SQL-2890 - Tính số sản phẩm khác nhau đã có giao dịch.html | grouping_having | 03_grouping_having/SQL-2890 - Tính số sản phẩm khác nhau đã có giao dịch.sql
+SQL-2891 - Liệt kê Top 3 sản phẩm theo tổng số lượng bán trong 30 ngày gần nhất tính từ ngày lớn nhất trong bảng time..html | filtering | 08_filtering/SQL-2891 - Liệt kê Top 3 sản phẩm theo tổng số lượng bán trong 30 ngày gần nhất tính từ ngày lớn nhất trong bảng time..sql
+SQL-2892 - Tnh tổng số lượng bán thuần chay.html | grouping_having | 03_grouping_having/SQL-2892 - Tnh tổng số lượng bán thuần chay.sql
+SQL-2893 - Tìm công suất lớn nhất trong giai đoạn .html | grouping_having | 03_grouping_having/SQL-2893 - Tìm công suất lớn nhất trong giai đoạn .sql
+SQL-2894 - Đếm số mẫu (model) theo quốc gia sản xuất .html | aggregation | 02_aggregation/SQL-2894 - Đếm số mẫu (model) theo quốc gia sản xuất .sql
+SQL-2895 - Liệt kê mẫu mới nhất cho từng loại phương tiện.html | complex | 10_complex/SQL-2895 - Liệt kê mẫu mới nhất cho từng loại phương tiện.sql
+SQL-2896 - Tính công suất trung bình cho các mẫu.html | grouping_having | 03_grouping_having/SQL-2896 - Tính công suất trung bình cho các mẫu.sql
+SQL-2897 - Tính tổng số vé đã bán .html | grouping_having | 03_grouping_having/SQL-2897 - Tính tổng số vé đã bán .sql
+SQL-2898 - Liệt kê các sự kiện thuộc thể loại music .html | complex | 10_complex/SQL-2898 - Liệt kê các sự kiện thuộc thể loại music .sql
+SQL-2899 - Đếm số sự kiện theo thể loại.html | grouping_having | 03_grouping_having/SQL-2899 - Đếm số sự kiện theo thể loại.sql
+SQL-2900 - Lấy Top 3 sự kiện trong các thể loại ('music','theater') có vé bán nhiều nhất..html | retrieval | 09_retrieval/SQL-2900 - Lấy Top 3 sự kiện trong các thể loại ('music','theater') có vé bán nhiều nhất..sql
+SQL-2901 - Liệt kê 3 đề tài nghiên cứu có số gene tham gia nhiều nhất, kèm số gene.html | grouping_having | 03_grouping_having/SQL-2901 - Liệt kê 3 đề tài nghiên cứu có số gene tham gia nhiều nhất, kèm số gene.sql
+SQL-2902 - Tìm công ty có số lượng gene khác nhau được nghiên cứu nhiều nhất.html | grouping_having | 03_grouping_having/SQL-2902 - Tìm công ty có số lượng gene khác nhau được nghiên cứu nhiều nhất.sql
+SQL-2903 - Liệt kê các tác phẩm được trưng bày ít nhất ở 2 triển lãm khác nhau..html | grouping_having | 03_grouping_having/SQL-2903 - Liệt kê các tác phẩm được trưng bày ít nhất ở 2 triển lãm khác nhau..sql
+SQL-2904 - Tìm các cặp tác phẩm từng được trưng bày cùng một triển lãm ít nhất 1 lần.html | complex | 10_complex/SQL-2904 - Tìm các cặp tác phẩm từng được trưng bày cùng một triển lãm ít nhất 1 lần.sql
+SQL-2905 - Tính doanh thu tháng 03-2025 theo từng loại dịch vụ.html | set_operations | 05_set_operations/SQL-2905 - Tính doanh thu tháng 03-2025 theo từng loại dịch vụ.sql
+SQL-2906 - Tìm Top 3 khách hàng theo tổng phí .html | complex | 10_complex/SQL-2906 - Tìm Top 3 khách hàng theo tổng phí .sql
+SQL-2907 - Tính tổng số giường theo từng territory, tách riêng giường bệnh viện và giường phòng khám, kèm tổng cộng..html | pivoting | 04_pivoting/SQL-2907 - Tính tổng số giường theo từng territory, tách riêng giường bệnh viện và giường phòng khám, kèm tổng cộng..sql
+SQL-2908 - Tính tỷ lệ (%) bệnh viện có sân bay trực thăng theo từng territory (chỉ xét những territory có ít nhất 1 bệnh viện)..html | grouping_having | 03_grouping_having/SQL-2908 - Tính tỷ lệ (%) bệnh viện có sân bay trực thăng theo từng territory (chỉ xét những territory có ít nhất 1 bệnh viện)..sql
+SQL-2909 - Tính tổng số vé đã bán theo từng thể loại trong tập ('music','theater').html | grouping_having | 03_grouping_having/SQL-2909 - Tính tổng số vé đã bán theo từng thể loại trong tập ('music','theater').sql
+SQL-2910 - Liệt kê các sự kiện thuộc music hoặc theater có tickets_sold lớn hơn mức trung bình của chính thể loại đó..html | complex | 10_complex/SQL-2910 - Liệt kê các sự kiện thuộc music hoặc theater có tickets_sold lớn hơn mức trung bình của chính thể loại đó..sql
+SQL-2911 - Tính tổng ngân sách AI theo từng quốc gia cho các năm từ 2019 trở đi..html | set_operations | 05_set_operations/SQL-2911 - Tính tổng ngân sách AI theo từng quốc gia cho các năm từ 2019 trở đi..sql
+SQL-2912 - Tìm năm có tổng ngân sách AI kết hợp lớn nhất (cộng của USA + UK + Japan) trong giai đoạn 2018–2021..html | complex | 10_complex/SQL-2912 - Tìm năm có tổng ngân sách AI kết hợp lớn nhất (cộng của USA + UK + Japan) trong giai đoạn 2018–2021..sql
+SQL-2913 - Liệt kê các sáng kiến triển khai trong năm 2024, kèm số sinh viên bị ảnh hưởng..html | grouping_having | 03_grouping_having/SQL-2913 - Liệt kê các sáng kiến triển khai trong năm 2024, kèm số sinh viên bị ảnh hưởng..sql
+SQL-2914 - Tính số sinh viên bị ảnh hưởng .html | grouping_having | 03_grouping_having/SQL-2914 - Tính số sinh viên bị ảnh hưởng .sql
+SQL-2915 - Liệt kê mỗi quốc gia có ít nhất 1 vi phạm.html | grouping_having | 03_grouping_having/SQL-2915 - Liệt kê mỗi quốc gia có ít nhất 1 vi phạm.sql
+SQL-2916 - Tính tỷ lệ (%) sản phẩm sử dụng.html | grouping_having | 03_grouping_having/SQL-2916 - Tính tỷ lệ (%) sản phẩm sử dụng.sql
+SQL1758 - Tìm các tác phẩm nghệ thuật được trưng bày.html | filtering | 08_filtering/SQL1758 - Tìm các tác phẩm nghệ thuật được trưng bày.sql
+SQL2220 - Liệt kê tất cả các bệnh viện ở bang New York, cùng với số lượng giường có sẵn và tỷ lệ phần trăm giường đã được chiếm dụng, theo thứ tự giảm dần của tỷ lệ phần trăm giường chiếm dụng..html | retrieval | 09_retrieval/SQL2220 - Liệt kê tất cả các bệnh viện ở bang New York, cùng với số lượng giường có sẵn và tỷ lệ phần trăm giường đã được chiếm dụng, theo thứ tự giảm dần của tỷ lệ phần trăm giường chiếm dụng..sql
+SQL2267 - Liệt kê tên và ID của những sinh viên đã nhận được chỗ ở nhiều hơn 1 khoa..html | grouping_having | 03_grouping_having/SQL2267 - Liệt kê tên và ID của những sinh viên đã nhận được chỗ ở nhiều hơn 1 khoa..sql
+SQL2288 - Các quốc gia nào có vi phạm chuỗi cung ứng và đồng thời sản xuất các sản phẩm sử dụng vật liệu tái chế.html | filtering | 08_filtering/SQL2288 - Các quốc gia nào có vi phạm chuỗi cung ứng và đồng thời sản xuất các sản phẩm sử dụng vật liệu tái chế.sql
+SQL2303 - Liệt kê tất cả các sáng kiến vận động chính sách đã tác động đến các cộng đồng lịch sử chưa được đại diện đầy đủ, kèm theo số lượng sinh viên bị ảnh hưởng, và hiển thị 5 sáng kiến có số lượng sinh viên bị ảnh hưởng cao nhất.html | grouping_having | 03_grouping_having/SQL2303 - Liệt kê tất cả các sáng kiến vận động chính sách đã tác động đến các cộng đồng lịch sử chưa được đại diện đầy đủ, kèm theo số lượng sinh viên bị ảnh hưởng, và hiển thị 5 sáng kiến có số lượng sinh viên bị ảnh hưởng cao nhất.sql
+SQL2372 - Tìm ngân sách trung bình hàng năm cho nghiên cứu AI ở Hoa Kỳ, Anh và Nhật Bản trong giai đoạn 2018-2020..html | set_operations | 05_set_operations/SQL2372 - Tìm ngân sách trung bình hàng năm cho nghiên cứu AI ở Hoa Kỳ, Anh và Nhật Bản trong giai đoạn 2018-2020..sql
+SQL2408 - Công suất tối đa của sedan điện ra mắt từ năm 2020 là bao nhiêu.html | aggregation | 02_aggregation/SQL2408 - Công suất tối đa của sedan điện ra mắt từ năm 2020 là bao nhiêu.sql
+SQL2426 - Tổng doanh thu được tạo ra từ thuê bao di động và băng thông rộng trong tháng trước là bao nhiêu.html | set_operations | 05_set_operations/SQL2426 - Tổng doanh thu được tạo ra từ thuê bao di động và băng thông rộng trong tháng trước là bao nhiêu.sql
+SQL2430 - Hiển thị số liệu giới tính cho từng công ty, bao gồm tỷ lệ nhân viên nữ và nam.html | pivoting | 04_pivoting/SQL2430 - Hiển thị số liệu giới tính cho từng công ty, bao gồm tỷ lệ nhân viên nữ và nam.sql
+SQL2435 - Đếm số lượng sản phẩm chăm sóc tóc thuần chay được bán trong 6 tháng qua.html | filtering | 08_filtering/SQL2435 - Đếm số lượng sản phẩm chăm sóc tóc thuần chay được bán trong 6 tháng qua.sql
+SQL2440 - Sự thay đổi về tỷ lệ tái chế kính giữa năm 2018 và 2019 là gì.html | complex | 10_complex/SQL2440 - Sự thay đổi về tỷ lệ tái chế kính giữa năm 2018 và 2019 là gì.sql
+SQL2441 - Chi tiết về các khoản đầu tư có điểm ESG lớn hơn 7,5 trong lĩnh vực năng lượng tái tạo là gì.html | filtering | 08_filtering/SQL2441 - Chi tiết về các khoản đầu tư có điểm ESG lớn hơn 7,5 trong lĩnh vực năng lượng tái tạo là gì.sql
+SQL2443 - Những con tàu nào đã đi tới Bắc Cực và chở hơn 5000 tấn hàng hóa.html | retrieval | 09_retrieval/SQL2443 - Những con tàu nào đã đi tới Bắc Cực và chở hơn 5000 tấn hàng hóa.sql
+SQL2450 - Có bao nhiêu sản phẩm may mặc cỡ 36 dành cho nữ đã được bán trong tháng trước.html | aggregation | 02_aggregation/SQL2450 - Có bao nhiêu sản phẩm may mặc cỡ 36 dành cho nữ đã được bán trong tháng trước.sql
+SQL2453 - Liệt kê tổng số sự cố an toàn lao động theo tình trạng công đoàn trong ngành xây dựng năm 2021 và 2022.html | grouping_having | 03_grouping_having/SQL2453 - Liệt kê tổng số sự cố an toàn lao động theo tình trạng công đoàn trong ngành xây dựng năm 2021 và 2022.sql
+SQL2540 - Liệt kê các bệnh viện ở Nairobi với năng lực phục vụ và số lượng bệnh nhân được tiêm chủng tại mỗi nơi..html | grouping_having | 03_grouping_having/SQL2540 - Liệt kê các bệnh viện ở Nairobi với năng lực phục vụ và số lượng bệnh nhân được tiêm chủng tại mỗi nơi..sql
+SQL2717 - Ai là 5 nhà cung cấp năng lượng gió hàng đầu theo mức công suất được tạo ra trong khu vực Midwest cho Quý 2 năm 2021.html | grouping_having | 03_grouping_having/SQL2717 - Ai là 5 nhà cung cấp năng lượng gió hàng đầu theo mức công suất được tạo ra trong khu vực Midwest cho Quý 2 năm 2021.sql
+SQL2731 - Xác định trung bình khán giả.html | grouping_having | 03_grouping_having/SQL2731 - Xác định trung bình khán giả.sql
+SQL2792 - Tổng số vé đã bán cho các sự kiện trong các hạng mục 'âm nhạc' và 'nhà hát' là bao nhiêu.html | retrieval | 09_retrieval/SQL2792 - Tổng số vé đã bán cho các sự kiện trong các hạng mục 'âm nhạc' và 'nhà hát' là bao nhiêu.sql

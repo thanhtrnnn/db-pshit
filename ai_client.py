@@ -47,7 +47,7 @@ if not _SQL_API_KEY:
 
 _TAXONOMY_API_KEY = os.getenv("GOOGLE_TAXONOMY_API_KEY") or _SQL_API_KEY
 
-_SQL_MODEL_NAME = os.getenv("GOOGLE_SQL_MODEL", "gemini-2.5-flash-lite")
+_SQL_MODEL_NAME = os.getenv("GOOGLE_SQL_MODEL", "gemini-2.5-flash")
 _TAXONOMY_MODEL_NAME = os.getenv("GOOGLE_TAXONOMY_MODEL", _SQL_MODEL_NAME)
 
 _TAXONOMY_OPTIONS = (

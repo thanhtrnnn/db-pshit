@@ -1,22 +1,22 @@
  -- Tables: Customer, SaleOrder, VipCustomer
  -- Technique: INSERT INTO ... SELECT (dialect: Mysql)
 
- INSERT INTO VipCustomer (CustID, CustomerName, City, TotalSpent2024)
- SELECT
+INSERT INTO VipCustomer (CustID, CustomerName, City, TotalSpent2024)
+SELECT
   c.CustID,
   c.CustomerName,
   c.City,
   SUM(so.TotalAmount) AS TotalSpent2024
- FROM
+FROM
   Customer AS c
- JOIN
+JOIN
   SaleOrder AS so
   ON c.CustID = so.CustID
- WHERE
+WHERE
   YEAR(so.OrderDate) = 2024
- GROUP BY
+GROUP BY
   c.CustID,
   c.CustomerName,
   c.City
- HAVING
+HAVING
   SUM(so.TotalAmount) >= 2000;

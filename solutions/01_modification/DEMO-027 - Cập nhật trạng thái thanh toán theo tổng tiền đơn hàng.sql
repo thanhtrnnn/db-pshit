@@ -14,3 +14,14 @@ WHERE
     HAVING
       SUM(oi.Qty * p.Price) >= 500
   );
+
+-- subquery
+Update Payment
+Set Status = 'PAID', PaidAt = '2025-01-01'
+Where OrderID in (
+    Select o.OrderID
+    From OrderItem o 
+    Join Product p on p.PID = o.PID
+    Group by o.OrderID
+    Having sum(p.Price * o.Qty) >= 500
+);

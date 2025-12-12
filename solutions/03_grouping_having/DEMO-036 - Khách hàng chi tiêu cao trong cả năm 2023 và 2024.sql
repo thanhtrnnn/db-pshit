@@ -7,11 +7,9 @@ JOIN
     SaleOrder AS so ON c.CustID = so.CustID
 JOIN
     Payment AS p ON so.OrderID = p.OrderID
-WHERE
-    p.Status = 'PAID'
-    AND YEAR(so.OrderDate) IN (2023, 2024)
 GROUP BY
     c.CustID,
     c.CustomerName
 HAVING
-    SUM(p.Amount) >= 500;
+    SUM(CASE WHEN YEAR(so.OrderDate) = 2023 THEN p.Amount ELSE 0 END) >= 500
+    AND SUM(CASE WHEN YEAR(so.OrderDate) = 2024 THEN p.Amount ELSE 0 END) >= 500;

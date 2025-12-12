@@ -14,6 +14,4 @@ GROUP BY
     c.CustomerName
 HAVING
     SUM(s.TotalAmount) >= 1000
-    AND MAX(CASE WHEN YEAR(s.OrderDate) = 2024 AND s.TotalAmount >= 500 THEN 1 ELSE 0 END) = 1
-ORDER BY
-    c.CustID;
+    AND SUM(CASE WHEN YEAR(s.OrderDate) = 2024 AND s.TotalAmount >= 500 THEN 1 ELSE 0 END) > 0;

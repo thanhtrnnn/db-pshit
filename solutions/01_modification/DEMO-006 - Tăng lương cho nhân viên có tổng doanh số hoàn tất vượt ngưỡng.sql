@@ -16,3 +16,14 @@ JOIN (
 ) AS sales_summary ON e.EmpID = sales_summary.EmpID
 SET
     e.Salary = e.Salary * 1.10;
+
+-- easier
+Update EMPLOYEE
+Set Salary = Salary * 1.10
+Where EmpID in (
+    Select EmpID
+    From SALEORDER
+    where Status = 'COMPLETED'
+    group by EmpID
+    Having sum(TotalAmount) > 50000
+);

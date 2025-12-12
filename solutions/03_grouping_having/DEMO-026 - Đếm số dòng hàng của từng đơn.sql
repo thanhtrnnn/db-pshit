@@ -16,3 +16,15 @@
   COUNT(oi.PID) >= 2
  ORDER BY
   so.OrderID;
+
+-- subquery version
+Select s.OrderID, c.CustomerName, ot.TotalLines
+From Customer c
+Join SaleOrder s on c.CustID = s.CustID
+Join (
+    Select OrderID, count(*) as TotalLines
+    From OrderItem
+    Group by OrderID
+    Having count(*) >= 2
+) ot on s.OrderID = ot.OrderID
+Order by s.OrderID;

@@ -1,17 +1,17 @@
  -- Tables: Category, Product, Supplier, Supply
  -- Technique: JOIN, GROUP BY, HAVING (dialect: Mysql)
- SELECT
+SELECT
   s.SID,
   s.SName
- FROM
+FROM
   Supplier AS s
-  JOIN Supply AS sy ON s.SID = sy.SID
-  JOIN Product AS p ON sy.PID = p.PID
-  JOIN Category AS c ON p.CatID = c.CatID
- WHERE
+JOIN Supply AS sy ON s.SID = sy.SID
+JOIN Product AS p ON sy.PID = p.PID
+JOIN Category AS c ON p.CatID = c.CatID
+WHERE
   c.CatName = 'Electronics'
- GROUP BY
+GROUP BY
   s.SID,
   s.SName
- HAVING
+HAVING
   COUNT(DISTINCT p.PID) >= 2;

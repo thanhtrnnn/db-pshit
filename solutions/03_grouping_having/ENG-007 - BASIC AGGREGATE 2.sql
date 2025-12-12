@@ -1,13 +1,13 @@
  -- Tables: Employee
  -- Technique: GROUP BY, HAVING, aggregation (dialect: Mysql)
 
- SELECT
+SELECT
   Dept,
   COUNT(DISTINCT EmpID) AS EmployeeCount,
   AVG(Salary) AS AvgSalary
- FROM
+FROM
   Employee
- GROUP BY
+GROUP BY
   Dept
- HAVING
+HAVING
   AvgSalary > 2000;

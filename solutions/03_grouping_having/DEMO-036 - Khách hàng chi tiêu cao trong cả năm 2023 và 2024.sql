@@ -7,6 +7,8 @@ JOIN
     SaleOrder AS so ON c.CustID = so.CustID
 JOIN
     Payment AS p ON so.OrderID = p.OrderID
+WHERE
+    p.Status = 'PAID'
 GROUP BY
     c.CustID,
     c.CustomerName

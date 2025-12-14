@@ -3,10 +3,10 @@
  
  SELECT
   cs.sector_name,
-  ROUND(100.0 *
+  100.0 *
    SUM(CASE WHEN us.union_status = 'Union' THEN wsi.incidents ELSE 0 END) /
    SUM(wsi.incidents)
-  ) AS union_share_pct
+  AS union_share_pct
  FROM
   workplace_safety_incidents wsi
  JOIN

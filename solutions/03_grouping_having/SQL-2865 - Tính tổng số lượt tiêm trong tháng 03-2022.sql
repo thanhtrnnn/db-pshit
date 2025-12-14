@@ -2,22 +2,19 @@
 --- Technique: JOIN (dialect: mysql)
 
 SELECT
-    h.name,
-    h.capacity,
-    COUNT(pv.id) AS total_shots_mar2022,
-    (COUNT(pv.id) * 100.0 / h.capacity) AS utilization_pct
+  h.name,
+  h.capacity,
+  COUNT(pv.id) AS total_shots_mar2022,
+  ROUND(COALESCE(100.0 * COUNT(pv.id) / h.capacity, 0), 2) AS utilization_pct
 FROM
-    hospitals AS h
+  hospitals h
 JOIN
-    patient_vaccinations AS pv
-ON
-    h.id = pv.hospital_id
+  patient_vaccinations pv ON h.id = pv.hospital_id
 WHERE
-    pv.date >= '2022-03-01'
-    AND pv.date <= '2022-03-31'
+  YEAR(pv.date) = 2022 AND MONTH(pv.date) = 3
 GROUP BY
-    h.id, h.name, h.capacity
-HAVING
-    COUNT(pv.id) > 0
+  h.id,
+  h.name,
+  h.capacity
 ORDER BY
-    utilization_pct DESC;
+  utilization_pct DESC;
